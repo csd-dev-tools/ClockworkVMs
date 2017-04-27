@@ -13,4 +13,5 @@ VmBuilder provides the ability to download and minimally re-configure cloud temp
 
 The application should work on all systems that have a functional install of Python 2.7 and PyQt 5.  The macos repository will only work on a system that is running macOS.
 
+## This is early release software, in development.
 
