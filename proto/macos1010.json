@@ -1,0 +1,13 @@
+{
+  "_comment": "Build with `packer build -var-file=macos1010.json macos.json`",
+  "vm_name": "macos1010",
+  "desktop": "true",
+  "cpus": "1",
+  "disk_size": "24000",
+  "iso_url": "dmg/OSX_InstallESD_10.10.5_14F27.dmg",
+  "memory": "6192",
+  "parallels_guest_os_type": "win-8",
+  "vagrantfile_template": "tpl/vagrantfile-macos1010.tpl",
+  "virtualbox_guest_os_type": "MacOS1010_64",
+  "vmware_guest_os_type": "darwin14-64"
+}
