@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/VMSettings_ui.ui'
 #
-# Created by: PyQt5 UI code generator 5.6
+# Created by: PyQt5 UI code generator 5.7
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -81,12 +81,6 @@ class Ui_VmSettings_ui(object):
         self.label_6 = QtWidgets.QLabel(self.page_3)
         self.label_6.setGeometry(QtCore.QRect(30, 110, 59, 16))
         self.label_6.setObjectName("label_6")
-        self.comboBox = QtWidgets.QComboBox(self.page_3)
-        self.comboBox.setGeometry(QtCore.QRect(160, 140, 104, 26))
-        self.comboBox.setObjectName("comboBox")
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
         self.label_7 = QtWidgets.QLabel(self.page_3)
         self.label_7.setGeometry(QtCore.QRect(30, 140, 131, 16))
         self.label_7.setObjectName("label_7")
@@ -105,6 +99,9 @@ class Ui_VmSettings_ui(object):
         self.label_11 = QtWidgets.QLabel(self.page_3)
         self.label_11.setGeometry(QtCore.QRect(30, 80, 59, 16))
         self.label_11.setObjectName("label_11")
+        self.leIsoHashAlgorithm = QtWidgets.QLineEdit(self.page_3)
+        self.leIsoHashAlgorithm.setGeometry(QtCore.QRect(160, 140, 351, 21))
+        self.leIsoHashAlgorithm.setObjectName("leIsoHashAlgorithm")
         self.stackedWidget.addWidget(self.page_3)
         self.page_4 = QtWidgets.QWidget()
         self.page_4.setObjectName("page_4")
@@ -213,7 +210,7 @@ class Ui_VmSettings_ui(object):
         self.gridLayout.addWidget(self.buttonBox, 3, 2, 1, 3)
 
         self.retranslateUi(VmSettings_ui)
-        self.stackedWidget.setCurrentIndex(3)
+        self.stackedWidget.setCurrentIndex(1)
         self.buttonBox.accepted.connect(VmSettings_ui.accept)
         self.buttonBox.rejected.connect(VmSettings_ui.reject)
         QtCore.QMetaObject.connectSlotsByName(VmSettings_ui)
@@ -226,8 +223,7 @@ class Ui_VmSettings_ui(object):
         VmSettings_ui.setTabOrder(self.leVmName, self.leIsoName)
         VmSettings_ui.setTabOrder(self.leIsoName, self.leIsoUrl)
         VmSettings_ui.setTabOrder(self.leIsoUrl, self.leIsoHash)
-        VmSettings_ui.setTabOrder(self.leIsoHash, self.comboBox)
-        VmSettings_ui.setTabOrder(self.comboBox, self.leCpus)
+        VmSettings_ui.setTabOrder(self.leIsoHash, self.leCpus)
         VmSettings_ui.setTabOrder(self.leCpus, self.leMemSize)
         VmSettings_ui.setTabOrder(self.leMemSize, self.leDiskSize)
         VmSettings_ui.setTabOrder(self.leDiskSize, self.leUserName)
@@ -262,9 +258,6 @@ class Ui_VmSettings_ui(object):
         self.label_4.setText(_translate("VmSettings_ui", "Iso Name"))
         self.label_5.setText(_translate("VmSettings_ui", "Iso URL"))
         self.label_6.setText(_translate("VmSettings_ui", "Iso Hash"))
-        self.comboBox.setItemText(0, _translate("VmSettings_ui", "None"))
-        self.comboBox.setItemText(1, _translate("VmSettings_ui", "SHA1"))
-        self.comboBox.setItemText(2, _translate("VmSettings_ui", "MD5"))
         self.label_7.setText(_translate("VmSettings_ui", "ISO Hash Algorithm"))
         self.label_11.setText(_translate("VmSettings_ui", "Iso Path"))
         self.label_8.setText(_translate("VmSettings_ui", "CPUs"))

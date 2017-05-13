@@ -64,7 +64,7 @@
    <item row="2" column="0" colspan="5">
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
-      <number>3</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="page">
       <widget class="QLabel" name="label_2">
@@ -232,31 +232,6 @@
         <string>Iso Hash</string>
        </property>
       </widget>
-      <widget class="QComboBox" name="comboBox">
-       <property name="geometry">
-        <rect>
-         <x>160</x>
-         <y>140</y>
-         <width>104</width>
-         <height>26</height>
-        </rect>
-       </property>
-       <item>
-        <property name="text">
-         <string>None</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>SHA1</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>MD5</string>
-        </property>
-       </item>
-      </widget>
       <widget class="QLabel" name="label_7">
        <property name="geometry">
         <rect>
@@ -321,6 +296,16 @@
        </property>
        <property name="text">
         <string>Iso Path</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="leIsoHashAlgorithm">
+       <property name="geometry">
+        <rect>
+         <x>160</x>
+         <y>140</y>
+         <width>351</width>
+         <height>21</height>
+        </rect>
        </property>
       </widget>
      </widget>
@@ -687,7 +672,6 @@
   <tabstop>leIsoName</tabstop>
   <tabstop>leIsoUrl</tabstop>
   <tabstop>leIsoHash</tabstop>
-  <tabstop>comboBox</tabstop>
   <tabstop>leCpus</tabstop>
   <tabstop>leMemSize</tabstop>
   <tabstop>leDiskSize</tabstop>
