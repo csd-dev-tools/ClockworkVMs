@@ -30,14 +30,11 @@ def getLibc(logger=False):
         #####
         # For Mac
         try:
-            #temp_dir = sys._MEIPASS
-            #libc_path = os.path.join(temp_dir, "libc.dylib")
-            #libc = ctypes.CDLL("libSystem.dylib")
             libc = ctypes.CDLL("/usr/lib/libc.dylib")
         except:
             raise Exception("DAMN IT JIM!!!")
-        else:
-            print "Loading Mac dylib......................................"
+        #else:
+        #    print "Loading Mac dylib......................................"
     elif osFamily and  osFamily.startswith("linux"):
         #####
         # For Linux
@@ -48,18 +45,14 @@ def getLibc(logger=False):
 
             if os.path.exists(path):
                 libc = ctypes.CDLL(path)
-                #print "     Found libc!!!"
                 break
     else:
         libc = False
     try:
         if libc:
             libc.sync()
-            #print":::::Syncing..............."
     except:
         raise Exception("..............................Cannot Sync.")
-
-    #print "OS Family: " + str(osFamily)
 
     return libc
 

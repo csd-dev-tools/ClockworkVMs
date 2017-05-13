@@ -24,6 +24,12 @@ class PackerJsonHandler():
         self.curConf = None
         self.logger = logger
 
+        self.clearData()
+
+    def clearData(self):
+        '''
+        Clear the data, so none is left over from previous loads
+        '''
         self._comment = ''
         self.builders = []
         self.postProcessors = []
@@ -34,7 +40,7 @@ class PackerJsonHandler():
         '''
         Reads in an existing json variables file and appends it to the 
         self.variables list
-        
+
         @author: Roy Nielsen
         '''
         if fname:
@@ -130,8 +136,8 @@ class PackerJsonHandler():
         Set configurable items in the JSON
         '''
         if self.variables:
-            self.variables['disk_size'] = hdSize        
-            self.variables['memory'] = Msize        
+            self.variables['disk_size'] = hdSize
+            self.variables['memory'] = Msize
             self.variables['iso_url'] = sourceImage
         else:
             raise Exception        
@@ -267,6 +273,39 @@ class PackerJsonHandler():
         '''
         try:
             return self.variables['ssh_password']
+        except KeyError:
+            return ""
+
+    def getSshUserComment(self):
+        '''
+        Getter for the ssh user comment/long name
+
+        @author: Roy Nielsen
+        '''
+        try:
+            return self.variables['ssh_user_comment']
+        except KeyError:
+            return ""
+
+    def getSshUserHomeDir(self):
+        '''
+        Getter for the ssh user home
+
+        @author: Roy Nielsen
+        '''
+        try:
+            return self.variables['ssh_user_home']
+        except KeyError:
+            return ""
+
+    def getSshUserShell(self):
+        '''
+        Getter for the ssh user shell
+
+        @author: Roy Nielsen
+        '''
+        try:
+            return self.variables['ssh_user_shell']
         except KeyError:
             return ""
 
@@ -435,28 +474,6 @@ class PackerJsonHandler():
         except KeyError:
             return ""
 
-    def getUser(self):
-        '''
-        Getter for the ssh user name
-
-        @author: Roy Nielsen
-        '''
-        try:
-            return self.variables['ssh_user']
-        except KeyError:
-            return ""
-
-    def getPassword(self):
-        '''
-        Getter for the ssh user password
-
-        @author: Roy Nielsen
-        '''
-        try:
-            return self.variables['ssh_password']
-        except KeyError:
-            return ""
-
     # ---
 
     def setComment(self, comment=''):
@@ -504,7 +521,7 @@ class PackerJsonHandler():
         if diskSize and isinstance(diskSize, basestring):
             self.variables['disk_size'] = diskSize
 
-    def setHeadless(self):
+    def setHeadless(self, headless=''):
         '''
         Setter for bool determining whether or not the vm is a headless 
         install.  (true/false) - not no caps...
@@ -560,7 +577,34 @@ class PackerJsonHandler():
         if sshPassword and isinstance(sshPassword, basestring):
             self.variables['ssh-password'] = sshPassword
 
-    def setVmVersion(self):
+    def setSshUserComment(self, userComment=''):
+        '''
+        Getter for the ssh user comment/long name
+
+        @author: Roy Nielsen
+        '''
+        if userComment and isinstance(userComment, basestring):
+            self.variables['ssh_user_comment'] = userComment
+
+    def setSshUserHome(self, userHome=''):
+        '''
+        Getter for the ssh user home
+
+        @author: Roy Nielsen
+        '''
+        if userHome and isinstance(userHome, basestring):
+            self.variables['ssh_user_home'] = userHome
+
+    def setSshUserShell(self, userShell=''):
+        '''
+        Getter for the ssh user shell
+
+        @author: Roy Nielsen
+        '''
+        if userShell and isinstance(userShell, basestring):
+            self.variables['ssh_user_shell'] = userShell
+
+    def setVmVersion(self, vmVersion=''):
         '''
         Setter for the version for the virtual machine
 
@@ -577,8 +621,8 @@ class PackerJsonHandler():
 
         @author: Roy Nielsen
         '''
-        if iso and isinstance(iso, basestring):
-            self.variables["iso"] = iso
+        if isoName and isinstance(isoName, basestring):
+            self.variables["iso"] = isoName
 
     def setIsoPath(self, isoPath=""):
         '''
@@ -643,7 +687,7 @@ class PackerJsonHandler():
         if ftpProxy and isinstance(ftpProxy, basestring):
             self.variables["ftpProxy"] = ftpProxy
 
-    def setRsyncProxy(self, RsyncProxy=''):
+    def setRsyncProxy(self, rsyncProxy=''):
         '''
         Setter for the rsync proxy
 
@@ -677,7 +721,7 @@ class PackerJsonHandler():
         @author: Roy Nielsen
         '''
         if vagrantfileTemplate and isinstance(vagrantfileTemplate, basestring):
-           self.variables['vagrantfile_template'] = vagrantfileTemplate
+            self.variables['vagrantfile_template'] = vagrantfileTemplate
 
     def setVmwareType(self, vmwareType=''):
         '''
@@ -697,28 +741,10 @@ class PackerJsonHandler():
         if virtualboxType and isinstance(virtualboxType, basestring):
             self.variables['virtualbox_guest_os_type'] = virtualboxType
 
-    def setUser(self, user=''):
-        '''
-        Setter for the ssh user name
-
-        @author: Roy Nielsen
-        '''
-        if user and isinstance(user, basestring):
-            self.variables['ssh_user'] = user
-
-    def setPassword(self, password=''):
-        '''
-        Setter for the ssh user password
-
-        @author: Roy Nielsen
-        '''
-        if password and isinstance(password, basestring):
-            self.variables['ssh_password'] = password
-
     def saveJsonVarFile(self, fname="", data=None):
         '''
         Save a boxcutter varfile
-        
+
         @author: Roy Nielsen
         '''
         self.logger.log(lp.DEBUG, "fname: " + str(fname))
@@ -733,19 +759,22 @@ class PackerJsonHandler():
     def saveJsonTemplateFile(self, fname="", data=None):
         '''
         Save a boxcutter template file.
-        
+
         @author: Roy Nielsen
         '''
-        if not data or isinstance(data, dict):
+        if not data or not isinstance(data, dict):
             data = {}
             data['variables'] = self.variables
             data['builders'] = self.builders
-            data['post-processors'] = self.postProcessors 
+            data['post-processors'] = self.postProcessors
             data['provisioners'] = self.provisioners
             data['_comment'] = self._comment
-        data = self.cleanUserVars(data)
+        else:
+            print str(json.dumps(data, ensure_ascii=False, indent=3))
+
+        cleanData = self.cleanUserVars(data)
         with open(fname, 'w') as outfile:
-            outfile.write(json.dumps(data, ensure_ascii=False, indent=3))
+            outfile.write(json.dumps(cleanData, ensure_ascii=False, indent=3))
 
     def cleanUserVars(self, data={}):
         '''
@@ -775,48 +804,7 @@ class PackerJsonHandler():
 
         self.logger.log(lp.DEBUG, "-----")
         self.logger.log(lp.DEBUG, str(data['builders']))
-        '''
-        x = 0
-        for item in data['builders']:
-            for key, value in item.iteritems():
-                if isinstance(value, basestring):
-                    value = re.sub("{{user", "{{ user", value)
-                    value = re.sub("{{env", "{{ env", value)
-                    value = re.sub("`}}", "` }}", value)
-                    #value = re.sub('\"', '\\"', value)
-                    data['builders'][x][key] = value
-                if isinstance(value, list):
-                    y = 0
-                    for atom in value:
-                        self.logger.log(lp.DEBUG,  str(atom))
-                        if isinstance(atom, basestring):
-                            atom = re.sub("{{user", "{{ user", atom)
-                            atom = re.sub("{{env", "{{ env", atom)
-                            atom = re.sub("`}}", "` }}", atom)
-                            data['builders'][x][key] = atom
-                        if isinstance(atom, list):
-                            z = 0
-                            for nutron in atom:
-                                if isinstance(nutron, basestring):
-                                    nutron = re.sub("{{user", "{{ user", nutron)
-                                    nutron = re.sub("{{env", "{{ env", nutron)
-                                    nutron = re.sub("`}}", "` }}", nutron)
-                                    self.logger.log(lp.DEBUG, "---")
-                                    self.logger.log(lp.DEBUG, str(data['builders']))
-                                    self.logger.log(lp.DEBUG, "---")
-                                    self.logger.log(lp.DEBUG, str(data['builders'][x]))
-                                    self.logger.log(lp.DEBUG, "---")
-                                    #self.logger.log(lp.DEBUG, str(data['builders']))
-                                    #self.logger.log(lp.DEBUG, str(data['builders']))
-                                    #self.logger.log(lp.DEBUG, str(data['builders']))
-                                    data['builders'][x][key][y][z] = nutron
-                                z = z + 1
-                        y = y + 1
-            x = x + 1
-        self.logger.log(lp.DEBUG, "---")
-        self.logger.log(lp.DEBUG, str(data['builders']))
-        self.logger.log(lp.DEBUG, "-----")
-        '''
+
         return data
     
     def sanitizeString(self, string="", checkKey=""):

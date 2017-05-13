@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import os
 import re
 import sys
+import copy
 import json
 import time
 import urllib
@@ -74,7 +75,8 @@ class VirtualMachineSettings(QtWidgets.QDialog):
         self.logger.log(lp.DEBUG, str(self.logger))
         self.runWith = RunWith(self.logger)
         self.libc = getLibc(self.logger)
-        self.pjh = PackerJsonHandler(self.logger)
+        self.vPjh = PackerJsonHandler(self.logger) # variables file
+        self.tPjh = PackerJsonHandler(self.logger) # template file
         self.jsonData = {}
         self.vmTypes = []
         self.doVagrantBox = False
@@ -99,10 +101,10 @@ class VirtualMachineSettings(QtWidgets.QDialog):
         self.ui.userButton.clicked.connect(self.selectUser)
         self.ui.proxiesButton.clicked.connect(self.selectProxies)
 
-
         #####
         # Acquire current json varfile data and print it.
         self.varFilePath = self.conf.getCurrentVarFilePath()
+        self.templateFilePath = ""
 
         self.loadValuesToUI(self.varFilePath)
         self.selectGeneral()
@@ -139,7 +141,7 @@ class VirtualMachineSettings(QtWidgets.QDialog):
         self.logger.log(lp.DEBUG, "Load File: " + str(loadfile))
         if self.varFilePath and isSaneFilePath(self.varFilePath):
             try:
-                self.jsonData = self.pjh.readExistingJsonVarfile(loadfile)
+                self.vJsonData = self.vPjh.readExistingJsonVarfile(loadfile)
                 self.logger.log(lp.DEBUG, "JSON loaded: " + str(self.jsonData))
             except Exception, err:
                 QtWidgets.QMessageBox.critical(self, "Error", "...Exception trying to read packer json...", QtWidgets.QMessageBox.Ok)
@@ -147,30 +149,12 @@ class VirtualMachineSettings(QtWidgets.QDialog):
             else:
                 #####
                 # Fill out labels
-                self.ui.leComment.setText(self.pjh.getComment())
-                self.ui.leVmName.setText(self.pjh.getVmName())
-                self.ui.leCpus.setText(self.pjh.getCpus())
-                self.ui.leMemSize.setText(self.pjh.getMemSize())
-                self.ui.leDiskSize.setText(self.pjh.getDiskSize())
-                self.ui.leUserName.setText(self.pjh.getUser())
-                self.ui.leUserPassword.setText(self.pjh.getPassword())
-                self.ui.leVerifyPassword.setText(self.pjh.getPassword())
-                self.ui.leIsoHash.setText(self.pjh.getIsoChecksum())
-                self.ui.leIsoUrl.setText(self.pjh.getIsoUrl())
-                if not self.pjh.getIsoPath():
-                    varFileDir = os.path.dirname(self.varFilePath)
-                    isoPath = varFileDir + "/Downloads/"
-                    if not os.path.exists(isoPath):
-                        os.mkdir(isoPath)
-                    elif not os.path.isdir(isoPath):
-                        #####
-                        # Move/delete what's there
-                        pass
-                    self.ui.leIsoPath.setText(isoPath)
-                    self.pjh.setIsoPath(isoPath)
-                else:
-                    self.ui.leIsoPath.setText(self.pjh.getIsoPath())
-
+                comment = self.vPjh.getComment()
+                templateFile = comment.split()[-1].strip('`')
+                templateDir = os.path.dirname(self.varFilePath)
+                self.templateFilePath = templateDir + "/" + templateFile
+                self.conf.setCurrentTemplateFilePath(self.templateFilePath)
+                self.tJsonData = self.tPjh.readExistingJsonTemplateFile(self.templateFilePath)
                 #####
                 # Turn of checkbox tri-state
                 self.ui.chkDesktop.setTristate(False)
@@ -179,79 +163,225 @@ class VirtualMachineSettings(QtWidgets.QDialog):
                 self.ui.chkVbox.setTristate(False)
                 self.ui.chkParallels.setTristate(False)
                 self.ui.chkVagrant.setTristate(False)
-                
-                #####
-                # Fill out desktop and updates
-                if re.match("false", self.pjh.getDesktop()):
-                    self.ui.chkDesktop.setChecked(False)
-                else:
-                    self.ui.chkDesktop.setChecked(True)
 
-                if re.match("false", self.pjh.getUpdate()):
-                    self.ui.chkUpdate.setChecked(False)
-                else:
-                    self.ui.chkUpdate.setChecked(True)
-                
-                #####
-                # Set image boxes to checked, and read only...
-                self.ui.chkVmware.setChecked(False)
-                self.ui.chkVbox.setChecked(False)
-                self.ui.chkParallels.setChecked(False)
-                self.ui.chkVagrant.setChecked(False)
-                """
-                self.ui.chkVmware.setCheckable(False)
-                self.ui.chkVbox.setCheckable(False)
-                self.ui.chkParallels.setCheckable(False)
-                self.ui.chkVagrant.setCheckable(False)
-                """
+                self.loadGuiFromPjh(self.tPjh)
+                self.loadGuiFromPjh(self.vPjh)
+
         else:
             QtWidgets.QMessageBox.critical(self, "Error", "...Bad path for packer json...", QtWidgets.QMessageBox.Ok)
             self.close()
 
+    def loadGuiFromPjh(self, pjh):
+        '''
+        '''
+        ##############################################3
+        # stacked widget[0] - general info
+        comment = pjh.getComment()
+        if comment:
+            self.ui.leComment.setText(comment)
+
+        vmName = pjh.getVmName()
+        if vmName:
+            self.ui.leVmName.setText(vmName)
+
+        #####
+        # Fill out desktop and updates
+        if re.match("false", pjh.getDesktop()):
+            self.ui.chkDesktop.setChecked(False)
+        else:
+            self.ui.chkDesktop.setChecked(True)
+
+        if re.match("false", pjh.getUpdate()):
+            self.ui.chkUpdate.setChecked(False)
+        else:
+            self.ui.chkUpdate.setChecked(True)
+
+        #####
+        # Set image boxes to checked, and read only...
+        self.ui.chkVmware.setChecked(False)
+        self.ui.chkVbox.setChecked(False)
+        self.ui.chkParallels.setChecked(False)
+        self.ui.chkVagrant.setChecked(False)
+
+        ##############################################
+        # stacked widget[1] - iso info
+        isoName = pjh.getIsoName()
+        if isoName:
+            self.ui.leIsoName.setText(isoName)
+
+        isoChecksum = pjh.getIsoChecksum()
+        if isoChecksum:
+            self.ui.leIsoHash.setText(isoChecksum)
+
+
+        isoHashAlgorithm = pjh.getIsoChecksumType()
+        if isoHashAlgorithm:
+            self.ui.leIsoHashAlgorithm.setText(isoHashAlgorithm)
+
+        isoUrl = pjh.getIsoUrl()
+        if isoUrl:
+            self.ui.leIsoUrl.setText(isoUrl)
+
+        #####
+        # Set the iso path
+        varFileDir = os.path.dirname(self.varFilePath)
+        isoPath = varFileDir + "/Downloads/"
+        if not os.path.exists(isoPath):
+            os.mkdir(isoPath)
+        elif not os.path.isdir(isoPath):
+            #####
+            # Move/delete what's there
+            pass
+        self.ui.leIsoPath.setText(isoPath)
+        pjh.setIsoPath(isoPath)
+
+        ##############################################
+        # stacked widget[2] - hardware specs
+        cpus = pjh.getCpus()
+        if cpus:
+            self.ui.leCpus.setText(cpus)
+
+        memSize = pjh.getMemSize()
+        if memSize:
+            self.ui.leMemSize.setText(memSize)
+
+        diskSize = pjh.getDiskSize()
+        if diskSize:
+            self.ui.leDiskSize.setText(diskSize)
+
+        ##############################################
+        # stacked widget[3] - user data
+        user = pjh.getSshUser()
+        if user:
+            self.ui.leUserName.setText(user)
+
+        password = pjh.getSshPassword()
+        if password:
+            self.ui.leUserPassword.setText(password)
+            self.ui.leVerifyPassword.setText(password)
+
+        userComment = pjh.getSshUserComment()
+        if userComment:
+            self.ui.leUserComment.setText(userComment)
+
+        userHomeDir = pjh.getSshUserHomeDir()
+        if userHomeDir:
+            self.ui.leUserHomeDir.setText(userHomeDir)
+
+        userShell = pjh.getSshUserShell()
+        if userShell:
+            self.ui.leUserShell.setText(userShell)
+
+        ##############################################
+        # stacked widget[4] - proxy info
+        httpProxy = pjh.getHttpProxy()
+        if httpProxy:
+            self.ui.leHttpProxy.setText(httpProxy)
+
+        httpsProxy = pjh.getHttpsProxy()
+        if httpsProxy:
+            self.ui.leHttpsProxy.setText(httpsProxy)
+
+        ftpProxy = pjh.getFtpProxy()
+        if ftpProxy:
+            self.ui.leFtpProxy.setText(ftpProxy)
+
+        rsyncProxy = pjh.getRsyncProxy()
+        if rsyncProxy:
+            self.ui.leRsyncProxy.setText(rsyncProxy)
+
+        noProxy = pjh.getNoProxy()
+        if noProxy:
+            self.ui.leNoProxy.setText(noProxy)
+
+    def clearJsonVariables(self):
+        '''
+        '''
+        self.jsonVariables = {}
+
     def getVarsFromIface(self):
         '''
         '''
-        #####
-        # Acquire data from UI
+        self.jsonVariables = {}
+        ##############################################
+        # stacked widget[0] - general info
+
         _comment = self.ui.leComment.text().strip()
         vm_name = self.ui.leVmName.text().strip()
-        cpus = self.ui.leCpus.text().strip()
-        memory = self.ui.leMemSize.text().strip()
-        disk_size = self.ui.leDiskSize.text().strip()
-        iso_path = self.ui.leIsoPath.text().strip()
-        ssh_user = self.ui.leUserName.text().strip()
-        ssh_password = self.ui.leUserPassword.text().strip()
-        ssh_verify_password = self.ui.leVerifyPassword.text().strip()
 
-
-        #####
-        # Insert the valid values into the self.jsonData
         if _comment:
-            self.jsonData["_comment"] = _comment
+            self.jsonVariables["_comment"] = _comment
         if vm_name:
-            self.jsonData["vm_name"] = vm_name
-        if cpus:
-            self.jsonData["cpus"] = cpus
-        if memory:
-            self.jsonData["memory"] = memory
-        if disk_size:
-            self.jsonData["disk_size"] = disk_size
-        if iso_path:
-            self.jsonData["iso_path"] = iso_path
-        if ssh_user:
-            self.jsonData["ssh_username"] = ssh_user
+            self.jsonVariables["vm_name"] = vm_name
+
         #####
         # Get checkbox values
-        self.jsonData["desktop"] = str(self.ui.chkDesktop.isChecked()).lower()
-        self.jsonData["update"] = str(self.ui.chkUpdate.isChecked()).lower()
-        if not self.ui.chkVagrant.isChecked:
+        self.jsonVariables["desktop"] = str(self.ui.chkDesktop.isChecked()).lower()
+        self.jsonVariables["update"] = str(self.ui.chkUpdate.isChecked()).lower()
+
+        if not self.ui.chkVagrant.isChecked():
             self.only = True
         else:
             self.only = False
+
+        ##############################################3
+        # stacked widget[1] - general info
+        iso_name = self.ui.leIsoName.text().strip()
+        iso_url = self.ui.leIsoUrl.text().strip()
+        iso_path = self.ui.leIsoPath.text().strip()
+        iso_hash = self.ui.leIsoHash.text().strip()
+        iso_hash_algorithm = self.ui.leIsoHashAlgorithm.text().strip()
+        if iso_path:
+            self.jsonVariables["iso_path"] = iso_path
+        if iso_url:
+            self.jsonVariables["iso_url"] = iso_url
+        if iso_path:
+            self.jsonVariables["iso_path"] = iso_path
+        if iso_hash:
+            self.jsonVariables["iso_checksum"] = iso_hash
+        if iso_hash_algorithm:
+            self.jsonVariables["iso_checksum_type"] = iso_hash_algorithm
+
+        ##############################################
+        # stacked widget[2] - general info
+        cpus = self.ui.leCpus.text().strip()
+        memory = self.ui.leMemSize.text().strip()
+        disk_size = self.ui.leDiskSize.text().strip()
+
+        if cpus:
+            self.jsonVariables["cpus"] = cpus
+        if memory:
+            self.jsonVariables["memory"] = memory
+        if disk_size:
+            self.jsonVariables["disk_size"] = disk_size
+
+        ##############################################
+        # stacked widget[3] - general info
+        
+        ssh_user = self.ui.leUserName.text().strip()
+        ssh_password = self.ui.leUserPassword.text().strip()
+        ssh_verify_password = self.ui.leVerifyPassword.text().strip()
+        ssh_user_home = self.ui.leUserHomeDir.text().strip()
+        ssh_user_shell = self.ui.leUserShell.text().strip()
+        ssh_user_comment = self.ui.leUserComment.text().strip()
+
+#loop???
+
+        if ssh_user:
+            self.jsonVariables["ssh_username"] = ssh_user
         if ssh_password and ssh_password == ssh_verify_password:
-            self.jsonData["ssh_password"] = ssh_password
+            self.jsonVariables["ssh_password"] = ssh_password
         else:
+            self.clearJsonVariables()
             QtWidgets.QMessageBox.critical(self, "Error", "...Password mis-match, please re-enter passwords...", QtWidgets.QMessageBox.Ok)
+
+        ##############################################
+        # stacked widget[4] - general info
+        self.jsonVariables["http_proxy"] = self.ui.leHttpProxy.text().strip()
+        self.jsonVariables["https_proxy"] = self.ui.leHttpsProxy.text().strip()
+        self.jsonVariables["ftp_proxy"] = self.ui.leFtpProxy.text().strip()
+        self.jsonVariables["rsync_proxy"] = self.ui.leRsyncProxy.text().strip()
+        self.jsonVariables["no_proxy"] = self.ui.leNoProxy.text().strip()
 
         self.logger.log(lp.DEBUG, "JSON data: " + str(self.jsonData))
 
@@ -259,8 +389,10 @@ class VirtualMachineSettings(QtWidgets.QDialog):
         '''
         '''
         loadFile = self.conf.getCurrentVarFilePath()
-        self.jsonData = self.pjh.readExistingJsonVarfile(loadFile)
+        self.jsonVariables = self.vPjh.readExistingJsonVarfile(loadFile)
+        self.vPjh.printVariables()
         self.getVarsFromIface()
+        #print str(self.jsonVariables)
 
     def saveTemporaryTemplateFile(self, filename=''):
         '''
@@ -275,9 +407,6 @@ class VirtualMachineSettings(QtWidgets.QDialog):
             vmtypes.append('virtualbox-iso')
         if self.ui.chkParallels.isChecked():
             vmtypes.append('parallels-iso')
-            
-        varsFromIface = {}
-        varsFromIface = self.mergeIfaceVarsWithVarFile()
 
         if not vmtypes:
             QtWidgets.QMessageBox.critical(self, "Error", "...Need a virtual machine to be selected...", QtWidgets.QMessageBox.Ok)
@@ -286,7 +415,7 @@ class VirtualMachineSettings(QtWidgets.QDialog):
                 includeVagrant = True
 
             if templateFile and isinstance(templateFile, basestring):
-                data = self.pjh.readExistingJsonTemplateFile(templateFile)
+                data = self.tPjh.readExistingJsonTemplateFile(templateFile)
                 print str(json.dumps(data, ensure_ascii=False, indent=3))
                 newJson = {}
 
@@ -299,15 +428,26 @@ class VirtualMachineSettings(QtWidgets.QDialog):
                     except KeyError:
                         pass
 
-                newJson['variables'] = data['variables']
+                newJson['variables'] = copy.deepcopy(data['variables'])
 
-                self.getVarsFromIface()
+                print "."
+                print "."
+                print "."
+                print "."
+                for key, value in newJson['variables'].iteritems():
+                    print str(key) + " = " + str(value)
+                print "."
+                print "."
+                print "."
+                print "."
 
-                for key, value in self.jsonData.iteritems():
+                self.mergeIfaceVarsWithVarFile()
+
+                for key, value in self.jsonVariables.iteritems():
                     newJson['variables'][key] = value
 
-                newJson['provisioners'] = data['provisioners']
-                newJson['post-processors'] = data['post-processors']
+                newJson['provisioners'] = copy.deepcopy(data['provisioners'])
+                newJson['post-processors'] = copy.deepcopy(data['post-processors'])
                 newJson['post-processors'][0]['keep_input_artifact'] = True
                 newJson['builders'] = []
         
@@ -320,55 +460,73 @@ class VirtualMachineSettings(QtWidgets.QDialog):
                         for item in values:
                             print item['type']
                             if item['type'] in vmtypes:
-                                newJson['builders'].append(item)
+                                newJson['builders'].append(copy.deepcopy(item))
 
                     #elif re.match("post-processors", key) and includeVagrant:
                     #    newJson[key] = data[key]
+
                 print str(json.dumps(newJson, ensure_ascii=False, indent=3))
-                self.pjh.saveJsonTemplateFile(filename, newJson)
+                self.tPjh.saveJsonTemplateFile(filename, newJson)
+                self.libc.sync()
+                time.sleep(1)
+                self.libc.sync()
+                time.sleep(1)
             else:
                 QtWidgets.QMessageBox.critical(self, "Error", "...Need a valid template file name...", QtWidgets.QMessageBox.Ok)
 
     def saveVarsToJsonFile(self, filename=""):
         '''
         '''
+        ##############################################
+        # stacked widget[0] - general info
         _comment = self.ui.leComment.text().strip()
         vm_name = self.ui.leVmName.text().strip()
+        if _comment:
+            self.jsonVariables["_comment"] = _comment
+        if vm_name:
+            self.jsonVariables["vm_name"] = vm_name
+
+        #####
+        # Get checkbox values
+        self.jsonVariables["desktop"] = str(self.ui.chkDesktop.isChecked()).lower()
+        self.jsonVariables["update"] = str(self.ui.chkUpdate.isChecked()).lower()
+
+        ##############################################
+        # stacked widget[1] - general info
+        iso_path = self.ui.leIsoPath.text().strip()
+        if iso_path:
+            self.jsonVariables["iso_path"] = iso_path
+
+        ##############################################
+        # stacked widget[2] - general info
         cpus = self.ui.leCpus.text().strip()
         memory = self.ui.leMemSize.text().strip()
         disk_size = self.ui.leDiskSize.text().strip()
-        iso_path = self.ui.leIsoPath.text().strip()
+        if cpus:
+            self.jsonVariables["cpus"] = cpus
+        if memory:
+            self.jsonVariables["memory"] = memory
+        if disk_size:
+            self.jsonVariables["disk_size"] = disk_size
+
+        ##############################################
+        # stacked widget[3] - user info
         ssh_user = self.ui.leUserName.text().strip()
         ssh_password = self.ui.leUserPassword.text().strip()
         ssh_verify_password = self.ui.leVerifyPassword.text().strip()
-
-        if _comment:
-            self.jsonData["_comment"] = _comment
-        if vm_name:
-            self.jsonData["vm_name"] = vm_name
-        if cpus:
-            self.jsonData["cpus"] = cpus
-        if memory:
-            self.jsonData["memory"] = memory
-        if disk_size:
-            self.jsonData["disk_size"] = disk_size
-        if iso_path:
-            self.jsonData["iso_path"] = iso_path
         if ssh_user:
-            self.jsonData["ssh_username"] = ssh_user
+            self.jsonVariables["ssh_username"] = ssh_user
         if ssh_password == ssh_verify_password:
-            self.jsonData["ssh_password"] = ssh_password
-
-            #####
-            # Get checkbox values
-            self.jsonData["desktop"] = str(self.ui.chkDesktop.isChecked()).lower()
-            self.jsonData["update"] = str(self.ui.chkUpdate.isChecked()).lower()
-
-            self.logger.log(lp.DEBUG, "JSON data: " + str(self.jsonData))
-
-            self.pjh.saveJsonVarFile(filename, self.jsonData)
+            self.jsonVariables["ssh_password"] = ssh_password
         else:
+            self.clearJsonVariables()
             QtWidgets.QMessageBox.critical(self, "Error", "...Password mis-match, please re-enter passwords...", QtWidgets.QMessageBox.Ok)
+
+        ##############################################
+        # stacked widget[4] - proxies
+            self.logger.log(lp.DEBUG, "JSON data: " + str(self.jsonVariables))
+
+        self.pjh.saveJsonVarFile(filename, self.jsonVariables)
 
     def processVm(self):
         '''
@@ -379,13 +537,13 @@ class VirtualMachineSettings(QtWidgets.QDialog):
 
         #####
         # Save temp template file
-        varFileFullPath = self.conf.getCurrentTemplateFilePath()
-        partial_prefix = varFileFullPath.split("/")[-1]
+        templateFileFullPath = self.conf.getCurrentTemplateFilePath()
+        partial_prefix = templateFileFullPath.split("/")[-1]
         prefix = ".".join(partial_prefix.split('.')[:-1])
         tmpTemplateFile = tempfile.mkstemp(".json", prefix)[1]
         self.saveTemporaryTemplateFile(tmpTemplateFile)
         self.logger.log(lp.DEBUG, "tmpTemplateFile: " + str(tmpTemplateFile))
-
+        '''
         #####
         # Save temp variables file
         varFileFullPath = self.conf.getCurrentVarFilePath()
@@ -394,11 +552,28 @@ class VirtualMachineSettings(QtWidgets.QDialog):
         tmpVarFile = tempfile.mkstemp(".json", prefix)[1]
         self.saveVarsToJsonFile(tmpVarFile)
         self.logger.log(lp.DEBUG, "varFileJson: " + str(tmpVarFile))
+        '''
+        #####
+        # Detect if only one VM build is called for
+        vmware = self.ui.chkVmware.isChecked()
+        vbox = self.ui.chkVbox.isChecked()
+        parallels = self.ui.chkParallels.isChecked()
+
+        only = False
+        if vmware and not vbox and not parallels:
+            only = 'vmware-iso'
+        elif not vmware and vbox and not parallels:
+            only = 'virtualbox-iso'
+        elif not vmware and not vbox and parallels:
+            only = 'parallels-iso'
 
         #####
         # Run packer
         pr = PackerRunner(self.conf)
-        pr.runPackerBoxcutter(tmpTemplateFile)
+        if only or self.only:
+            pr.runPackerBoxcutter(tmpTemplateFile, vmImage=only)
+        else:
+            pr.runPackerBoxcutter(tmpTemplateFile)
 
     def saveForLater(self):
         '''
