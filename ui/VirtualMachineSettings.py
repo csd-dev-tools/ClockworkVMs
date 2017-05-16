@@ -81,6 +81,12 @@ class VirtualMachineSettings(QtWidgets.QDialog):
         self.vmTypes = []
         self.doVagrantBox = False
 
+        ####################
+        ### TEMPORARY until functionality is supported
+        self.ui.userButton.hide()
+        self.ui.proxiesButton.hide()
+        ####################
+
         #####
         # Handle button box
         self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.reject) 
@@ -173,6 +179,17 @@ class VirtualMachineSettings(QtWidgets.QDialog):
 
     def loadGuiFromPjh(self, pjh):
         '''
+        Load a packer JSON file and insert the values into the interface.
+        
+        @Note: the user and proxy pannel, while being processed, are not
+        currently fully functional.
+        
+        @param: pjh - PackerJsonHandler appropriate to the file that has been
+                      loaded.
+
+        @returns: nothing
+
+        @author: Roy Nielsen
         '''
         ##############################################3
         # stacked widget[0] - general info
@@ -296,11 +313,18 @@ class VirtualMachineSettings(QtWidgets.QDialog):
 
     def clearJsonVariables(self):
         '''
+        Clears the self.jsonVariables.  In future, this method may be more 
+        complex.
+        
+        @author: Roy Nielsen
         '''
         self.jsonVariables = {}
 
     def getVarsFromIface(self):
         '''
+        Acquire variables from the GUI
+
+        @author: Roy Nielsen
         '''
         self.jsonVariables = {}
         ##############################################
@@ -387,6 +411,9 @@ class VirtualMachineSettings(QtWidgets.QDialog):
 
     def mergeIfaceVarsWithVarFile(self):
         '''
+        Merge interface variables with the var file
+        
+        @author: Roy Nielsen
         '''
         loadFile = self.conf.getCurrentVarFilePath()
         self.jsonVariables = self.vPjh.readExistingJsonVarfile(loadFile)
@@ -396,6 +423,11 @@ class VirtualMachineSettings(QtWidgets.QDialog):
 
     def saveTemporaryTemplateFile(self, filename=''):
         '''
+        Save a temporary template file to use with the packer command.
+        
+        @param: filename - name of the file to save.
+        
+        @author: Roy Nielsen
         '''
         templateFile = self.conf.getCurrentTemplateFilePath()
         vmtypes = []
@@ -476,6 +508,11 @@ class VirtualMachineSettings(QtWidgets.QDialog):
 
     def saveVarsToJsonFile(self, filename=""):
         '''
+        Save interface values to a json file.
+
+        @param: filename - name of the JSON file
+
+        @author: Roy Nielsen
         '''
         ##############################################
         # stacked widget[0] - general info

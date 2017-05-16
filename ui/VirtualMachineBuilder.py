@@ -37,8 +37,8 @@ from ui.ConfigureRepos import ConfigureRepos
 # Exception for when the conf file can't be grokked.
 class ConfusingConfigurationError(Exception):
     """
-    Meant for being thrown when the MacBuilder can't determine configuration
-    information.
+    Meant for being thrown when the the application can't determine
+    configuration information.
 
     @author: Roy Nielsen
     """
@@ -48,7 +48,7 @@ class ConfusingConfigurationError(Exception):
 
 class VirtualMachineBuilder(QtWidgets.QDialog):
     """
-    Class to manage the set password dialog...
+    Class to manage the dialog...
 
     @author: Roy Nielsen
     """
@@ -106,6 +106,7 @@ class VirtualMachineBuilder(QtWidgets.QDialog):
 
     def refreshComboBoxes(self):
         '''
+        Determine what to put in the ComboBoxes
         '''
         #####
         # Fill the OS combo box
@@ -184,7 +185,8 @@ class VirtualMachineBuilder(QtWidgets.QDialog):
 
     def osFamilySelected(self, index):
         """
-        
+        Traslate a combobox position to a string.
+
         @author: Roy Nielsen
         """
         self.ui.osVersions.clear()
@@ -196,6 +198,7 @@ class VirtualMachineBuilder(QtWidgets.QDialog):
 
     def configureRepos(self):
         """
+        Spawn the ConfigureRepos interface.
 
         @author: Roy Nielsen
         """
@@ -208,7 +211,8 @@ class VirtualMachineBuilder(QtWidgets.QDialog):
 
     def processVm(self):
         """
- 
+        Set the configuration and spawn the VirtualMachineSettings interface
+
         @author: Roy Nielsen
         """
         QtWidgets.QMessageBox.information(self, "Information", "...Processing VM...", QtWidgets.QMessageBox.Ok)
