@@ -23,21 +23,9 @@
 ###############################################################################
 rm *.gz
 rm *.dmg
-rm -rf stonix
-#mkdir stonix
-rm -rf stonix4mac/*.log
-rm -rf stonix4mac/dist
-rm -rf stonix4mac/build
-find . -name "*.pyc" -exec rm {} \;
-#rm stonix4mac/admin_credentials_ui.py
-#rm stonix4mac/general_warning_ui.py
-#rm stonix4mac/stonix_wrapper_ui.py
-rm stonix4mac/*.spec
 rm *.log
 rm *.old
 rm *.xml
-rm -rf dmgs/stonix4mac.*
-rm -rf /tmp/stonix
-rm -rf /tmp/stonix4mac
 find . -iname "*.pyc" -print -exec rm {} \;
-
+rm -rf build
+rm -rf dist

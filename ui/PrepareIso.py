@@ -65,7 +65,6 @@ class PrepareIso(QtWidgets.QDialog):
         # Handle other buttons
         self.ui.bOpenInstallerApp.clicked.connect(self.openInstallerApp)
         self.ui.bPrepareIso.clicked.connect(self.prepareIso)
-        self.ui.bSaveToNewLocation.clicked.connect(self.saveImage)
 
         #####
         # Set up collection of administrator credentials
