@@ -102,6 +102,13 @@ class ConfigureRepos(QtWidgets.QDialog):
         self.reposRoot = self.conf.getRepoRoot()
         self.ui.winCheckBox.hide()
 
+        #####
+        # Future features
+        self.ui.winCheckBox.hide()
+        self.ui.label_2.hide()
+        self.ui.leReposPath.hide()
+        self.ui.proxyButton.hide()
+
         self.git = "/usr/bin/git"
         
         #####
