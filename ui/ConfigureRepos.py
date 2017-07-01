@@ -100,7 +100,13 @@ class ConfigureRepos(QtWidgets.QDialog):
         #####
         # default boxcutter repo path
         self.reposRoot = self.conf.getRepoRoot()
+        
+        #####
+        # Future features
         self.ui.winCheckBox.hide()
+        self.ui.label_2.hide()
+        self.ui.leReposPath.hide()
+        self.ui.proxyButton.hide()
 
         #####
         # Future features

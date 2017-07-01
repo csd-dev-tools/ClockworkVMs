@@ -86,7 +86,7 @@ class PrepareIso(QtWidgets.QDialog):
         '''
         self.installerApp = ""
 
-        fname, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', "/Applications", "Install*")
+        fname, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', "/Applications", "Install*.app")
 
         if not os.path.isdir(fname) or not re.match(".*\.app$", fname):
             #####
@@ -112,8 +112,14 @@ class PrepareIso(QtWidgets.QDialog):
         os.chdir(self.conf.getRepoRoot() + "/macos")
         print os.getcwd()
 
-        subcmd = """./prepare_iso/prepare_iso.sh %s dmg"""%(self.installerApp) 
+        subcmd = """./prepare_iso/prepare_iso.sh %s dmg"""%(self.installerApp)
+        
+        self.logger.log(lp.DEBUG, "Subcmd: " + str(subcmd))
+        
+        #subcmd = re.sub(r"\\\\", r"\\", subcmd)
 
+        #self.logger.log(lp.DEBUG, "Subcmd: " + str(subcmd))
+        
         cmd = ["/usr/bin/osascript", "-e", "do shell script \"{0}\" user name \"{1}\" password \"{2}\" with administrator privileges".format(subcmd, self.username, self.password)]
 
         self.runWith.setCommand(cmd, myshell=False)
@@ -124,23 +130,54 @@ class PrepareIso(QtWidgets.QDialog):
         self.logger.log(lp.DEBUG, "err: " + str(error))
         self.logger.log(lp.DEBUG, "retcode: " + str(retcode))
 
+        dmgName = ""
         #####
         # Get the (\w+_InstallESD_\w+\.dmg) name out of the output to write it
         # into the appropriate varfile
-        compile_dmg_name = re.compile(".*(OSX_InstallESD_[\d\.]+_\w+\.dmg).*")
-        dmgName = ""
-        for line in output.split("\n"):
+
+        compile_dmg_name = re.compile(".*(OSX_InstallESD_[\d+\.]+_\w+\.dmg).*")
+        #dmgName = ""
+        if not re.search("\n", output):
+            matcher = "\r"
+        else:
+            matcher = "\n"
+        for line in output.split(matcher):
             try:
+                if not line:
+                    continue
+                self.logger.log(lp.DEBUG, str(line))
                 search = compile_dmg_name.search(line)
                 dmgName = search.group(1)
                 break
-            except KeyError, err:
+            except (AttributeError, KeyError), err:
                 pass
                 # self.logger.log(lp.DEBUG, traceback.format_exc(err))
-
+        if not dmgName:
+            compile_dmg_name = re.compile(".*_(InstallESD_[\d+\.]+_\w+\.dmg).*")
+            if not re.search("\n", error):
+                matcher = "\r"
+            else:
+                matcher = "\n"
+            for line in error.split(matcher):
+                try:
+                    print str(line)
+                    if not line:
+                        continue
+                    self.logger.log(lp.DEBUG, str(line))
+                    search = compile_dmg_name.search(line)
+                    dmgName = search.group(1)
+                    break
+                except (AttributeError, KeyError), err:
+                    print "Could not grok, Jim..."
+                    pass
+                    # self.logger.log(lp.DEBUG, traceback.format_exc(err))
+        self.logger.log(lp.DEBUG, "dmgName: \"" + str(dmgName) + "\"")
         #####
         # Get the version out of the above variable to determine the right
         # varfile to write to.
+        if re.match("^InstallESD.*", dmgName):
+            dmgName = "OSX_" + str(dmgName)
+        self.logger.log(lp.DEBUG, "dmgName: " + str(dmgName))
         dmgVersSearch = re.search("OSX_InstallESD_(\d+\.\d+)\..*_\w+\.dmg", dmgName)
         dmgVersion = ""
         try:
