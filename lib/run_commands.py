@@ -283,19 +283,16 @@ class RunWith(object):
                             break
                         tmpline = myout.strip()
                         self.output += tmpline
-                        """
-                        myerr = proc.stderr.readline()
-                        tmperr = myerr.strip()
-                        self.error += tmperr
-                        """
-                        self.logger.log(lp.DEBUG, str(tmpline))
-        
+
+                        if tmpline:
+                            self.logger.log(lp.DEBUG, str(tmpline))
+                        
                         if isinstance(chk_string, str) :
                             if not chk_string:
                                 continue
                             else:
                                 if re.search(chk_string, tmpline):
-                                    proc.stdout.close()
+                                    #proc.stdout.close()
                                     if respawn:
                                         pass
                                     else:
@@ -307,15 +304,20 @@ class RunWith(object):
                             else:
                                 for mystring in chk_string :
                                     if chk_string(chk_string, tmpline):
-                                        proc.stdout.close()
+                                        #proc.stdout.close()
                                         if respawn:
                                             pass
                                         else:
                                             self.logger.log(lp.INFO, "chk_string found... exiting process.")
                                             break
-                
+                            
+                    self.error = "\n".join(proc.stderr.readlines())
                 proc.wait()
                 proc.stdout.close()
+
+            except Exception, err:
+                print "DANGER WILL ROBINSON!"
+                print str(err)
 
                 self.libc.sync()
 
