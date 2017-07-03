@@ -27,7 +27,7 @@ from lib.libHelperFunctions import isSaneFilePath
 
 #####
 # Import pyuic5 compiled PyQt ui files
-from ui.VirtualMachineBuilder_ui import  Ui_Dialog
+from ui.VirtualMachineBuilder_ui import  Ui_MainWindow
 from ui.VirtualMachineSettings import VirtualMachineSettings
 from ui.SettingsOk import SettingsOk
 from ui.ConfigureRepos import ConfigureRepos
@@ -46,7 +46,7 @@ class ConfusingConfigurationError(Exception):
         Exception.__init__(self, *args, **kwargs)
 
 
-class VirtualMachineBuilder(QtWidgets.QDialog):
+class VirtualMachineBuilder(QtWidgets.QMainWindow):
     """
     Class to manage the dialog...
 
@@ -60,7 +60,7 @@ class VirtualMachineBuilder(QtWidgets.QDialog):
         """
         super(VirtualMachineBuilder, self).__init__(parent)
 
-        self.ui =  Ui_Dialog()
+        self.ui =  Ui_MainWindow()
         self.ui.setupUi(self)
 
         #####
@@ -81,7 +81,8 @@ class VirtualMachineBuilder(QtWidgets.QDialog):
 
         #####
         # Handle button box
-        self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.reject) 
+        #
+        self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Close).clicked.connect(self.closeApplication) 
         self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.processVm) 
 
         #####
@@ -89,6 +90,13 @@ class VirtualMachineBuilder(QtWidgets.QDialog):
         self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Save).setText("Configure Repos")
         btn = self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Save)
         btn.clicked.connect(self.configureRepos)
+
+        #####
+        # Rename Apply button
+        self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setText("Install packer")
+        btn = self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Apply)
+        btn.clicked.connect(self.installPacker)
+        self.ui.buttonBox.apply.hide()
 
         #####
         # Set up the configure dialog
@@ -243,5 +251,13 @@ class VirtualMachineBuilder(QtWidgets.QDialog):
         #workConfig.show()
         vmStngRetval = vmSettings.exec_()
         vmSettings.raise_()
-
         
+    def closeApplication(self):
+        """
+        """
+        self.closeAllWindows()
+
+    def installPacker(self):
+        """
+        """
+        pass

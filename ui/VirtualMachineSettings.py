@@ -89,7 +89,7 @@ class VirtualMachineSettings(QtWidgets.QDialog):
 
         #####
         # Handle button box
-        self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.reject) 
+        #self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.reject) 
 
         self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).clicked.connect(self.processVm) 
 

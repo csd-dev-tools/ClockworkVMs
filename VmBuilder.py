@@ -57,9 +57,9 @@ def main():
     mydialog.setOpenExternalLinks(True)
     #mydialog.setModal(True)
     mydialog.setWindowTitle("Virtual Machine Builder")
-    mydialogRetval = mydialog.exec_()
+    #mydialogRetval = mydialog.exec_()
     mydialog.raise_()
-
+    '''
     if mydialogRetval == mydialog.Accepted:
         logger.log(lp.DEBUG, "Dialog accepted...")
         mydialogRetval = mydialog.exec_()
@@ -67,7 +67,7 @@ def main():
     elif mydialogRetval == mydialog.Rejected:
         logger.log(lp.DEBUG, "Dialog rejected...")
         app.closeAllWindows()
-
+    '''
     app.exec_()
 
 if __name__ == "__main__":
