@@ -2,53 +2,59 @@
 
 # Form implementation generated from reading ui file 'ui/VirtualMachineBuilder.ui'
 #
-# Created by: PyQt5 UI code generator 5.6
+# Created by: PyQt5 UI code generator 5.7
 #
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-class Ui_Dialog(object):
-    def setupUi(self, Dialog):
-        Dialog.setObjectName("Dialog")
-        Dialog.setWindowModality(QtCore.Qt.WindowModal)
-        Dialog.resize(329, 199)
-        Dialog.setModal(True)
-        self.gridLayout = QtWidgets.QGridLayout(Dialog)
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(325, 250)
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+        self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName("gridLayout")
-        self.osVersions = QtWidgets.QComboBox(Dialog)
-        self.osVersions.setObjectName("osVersions")
-        self.gridLayout.addWidget(self.osVersions, 4, 0, 1, 1)
-        self.buttonBox = QtWidgets.QDialogButtonBox(Dialog)
-        self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok|QtWidgets.QDialogButtonBox.Save)
-        self.buttonBox.setObjectName("buttonBox")
-        self.gridLayout.addWidget(self.buttonBox, 5, 0, 1, 1)
-        self.label = QtWidgets.QLabel(Dialog)
+        self.label_4 = QtWidgets.QLabel(self.centralwidget)
         font = QtGui.QFont()
         font.setPointSize(24)
-        self.label.setFont(font)
-        self.label.setObjectName("label")
-        self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
-        self.osFamily = QtWidgets.QComboBox(Dialog)
-        self.osFamily.setObjectName("osFamily")
-        self.gridLayout.addWidget(self.osFamily, 3, 0, 1, 1)
-        self.packerLabel = QtWidgets.QLabel(Dialog)
+        self.label_4.setFont(font)
+        self.label_4.setObjectName("label_4")
+        self.gridLayout.addWidget(self.label_4, 0, 0, 1, 1)
+        self.packerLabel = QtWidgets.QLabel(self.centralwidget)
         self.packerLabel.setObjectName("packerLabel")
         self.gridLayout.addWidget(self.packerLabel, 1, 0, 1, 1)
-        self.boxcutterLabel = QtWidgets.QLabel(Dialog)
+        self.boxcutterLabel = QtWidgets.QLabel(self.centralwidget)
         self.boxcutterLabel.setObjectName("boxcutterLabel")
         self.gridLayout.addWidget(self.boxcutterLabel, 2, 0, 1, 1)
+        self.osFamily = QtWidgets.QComboBox(self.centralwidget)
+        self.osFamily.setObjectName("osFamily")
+        self.gridLayout.addWidget(self.osFamily, 3, 0, 1, 1)
+        self.osVersions = QtWidgets.QComboBox(self.centralwidget)
+        self.osVersions.setObjectName("osVersions")
+        self.gridLayout.addWidget(self.osVersions, 4, 0, 1, 1)
+        self.buttonBox = QtWidgets.QDialogButtonBox(self.centralwidget)
+        self.buttonBox.setToolTipDuration(30)
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Apply|QtWidgets.QDialogButtonBox.Close|QtWidgets.QDialogButtonBox.Ok|QtWidgets.QDialogButtonBox.Save)
+        self.buttonBox.setObjectName("buttonBox")
+        self.gridLayout.addWidget(self.buttonBox, 5, 0, 1, 1)
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(MainWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 325, 22))
+        self.menubar.setObjectName("menubar")
+        MainWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        self.statusbar.setObjectName("statusbar")
+        MainWindow.setStatusBar(self.statusbar)
 
-        self.retranslateUi(Dialog)
-        self.buttonBox.accepted.connect(Dialog.accept)
-        self.buttonBox.rejected.connect(Dialog.reject)
-        QtCore.QMetaObject.connectSlotsByName(Dialog)
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-    def retranslateUi(self, Dialog):
+    def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Virtual Machine Builder"))
-        self.label.setText(_translate("Dialog", "Virtual Machine Builder"))
-        self.packerLabel.setText(_translate("Dialog", "TextLabel"))
-        self.boxcutterLabel.setText(_translate("Dialog", "TextLabel"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.label_4.setText(_translate("MainWindow", "Virtual Machine Builder"))
+        self.packerLabel.setText(_translate("MainWindow", "TextLabel"))
+        self.boxcutterLabel.setText(_translate("MainWindow", "TextLabel"))
 
