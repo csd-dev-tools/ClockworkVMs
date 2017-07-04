@@ -96,8 +96,8 @@ class VirtualMachineBuilder(QtWidgets.QMainWindow):
         self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setText("Install packer")
         btn = self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Apply)
         btn.clicked.connect(self.installPacker)
-        self.ui.buttonBox.apply.hide()
-
+        # self.ui.buttonBox.apply.hide()
+        btn.hide()
         #####
         # Set up the configure dialog
         self.configRepos = ConfigureRepos(self.conf)
