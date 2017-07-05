@@ -94,9 +94,9 @@ class VirtualMachineBuilder(QtWidgets.QMainWindow):
         #####
         # Rename Apply button
         self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setText("Install packer")
-        btn = self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Apply)
-        btn.clicked.connect(self.installPacker)
-        self.ui.buttonBox.apply.hide()
+        btnTwo = self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Apply)
+        btnTwo.clicked.connect(self.installPacker)
+        btnTwo.hide()
 
         #####
         # Set up the configure dialog
@@ -260,4 +260,6 @@ class VirtualMachineBuilder(QtWidgets.QMainWindow):
     def installPacker(self):
         """
         """
+        ##### After install, allow packer through the application firewall if
+        #     it is turned on.
         pass

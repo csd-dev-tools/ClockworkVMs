@@ -50,6 +50,8 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        MainWindow.show()
+        MainWindow.raise_()
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
