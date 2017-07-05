@@ -91,6 +91,8 @@ class SettingsOk(QtWidgets.QDialog):
                 jsonData = self.pjh.readExistingJsonVarfile(self.conf.getCurrentVarFilePath())
             except Exception, err:
                 QtWidgets.QMessageBox.critical(self, "Error", "...Exception trying to read packer json...", QtWidgets.QMessageBox.Ok)
+                self.logger.log(lp.WARNING, traceback.format_exc())
+                self.logger.log(lp.WARNING, str(err))
                 raise err
             else:
                 self.ui.labelVmName.setText(self.pjh.getVmName())
