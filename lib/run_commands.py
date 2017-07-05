@@ -194,6 +194,8 @@ class RunWith(object):
                 self.logger.log(lp.WARNING, "- Unexpected Exception: "  + \
                            str(err)  + " command: " + self.printcmd)
                 self.logger.log(lp.WARNING, "stderr: " + str(self.error))
+                self.logger.log(lp.WARNING, traceback.format_exc())
+                self.logger.log(lp.WARNING, str(err))
                 raise err
             else :
                 #self.logger.log(lp.DEBUG, self.printcmd + " Returned with error/returncode: " + str(proc.returncode))
@@ -230,7 +232,7 @@ class RunWith(object):
                 proc.wait()
                 for line in proc.stdout.readline():
                     if line:
-                        self.output = self.output + str(line)
+                        self.output = self.output + str(line) + "\n"
                 """
                 for line in proc.stderr.readline():
                     if line:
@@ -240,6 +242,8 @@ class RunWith(object):
                 self.logger.log(lp.WARNING, traceback.format_exc(err))
                 self.logger.log(lp.WARNING, "system_call_retval - Unexpected Exception: "  + \
                            str(err)  + " command: " + str(self.printcmd))
+                self.logger.log(lp.WARNING, traceback.format_exc())
+                self.logger.log(lp.WARNING, str(err))
                 raise err
             else :
                 self.logger.log(lp.DEBUG, str(self.printcmd) + \
@@ -282,7 +286,7 @@ class RunWith(object):
                         if myout == '' and proc.poll() != None: 
                             break
                         tmpline = myout.strip()
-                        self.output += tmpline
+                        self.output += tmpline + "\n"
 
                         if tmpline:
                             self.logger.log(lp.DEBUG, str(tmpline))
@@ -298,7 +302,17 @@ class RunWith(object):
                                     else:
                                         self.logger.log(lp.INFO, "chk_string found... exiting process.")
                                     break
-                        elif isinstance(chk_string, list) :
+                    while True:
+                        myerr = proc.stderr.readline()
+                        if myerr == '' and proc.poll() != None: 
+                            break
+                        tmpline = myerr.strip()
+                        self.error += tmpline + "\n"
+
+                        if tmpline:
+                            self.logger.log(lp.DEBUG, str(tmpline))
+                        
+                        if isinstance(chk_string, list) :
                             if not chk_string:
                                 continue
                             else:
@@ -311,7 +325,7 @@ class RunWith(object):
                                             self.logger.log(lp.INFO, "chk_string found... exiting process.")
                                             break
                             
-                    self.error = "\n".join(proc.stderr.readlines())
+                    #self.error = "\n".join(proc.stderr.readlines())
                 proc.wait()
                 proc.stdout.close()
 
@@ -383,6 +397,8 @@ class RunWith(object):
                 self.logger.log(lp.WARNING, "system_call_retval - Unexpected " + \
                             "Exception: "  + str(err)  + \
                             " command: " + self.printcmd)
+                self.logger.log(lp.WARNING, traceback.format_exc())
+                self.logger.log(lp.WARNING, str(err))
                 raise err
             else :
                 self.logger.log(lp.DEBUG, self.printcmd + \
@@ -635,6 +651,8 @@ class RunWith(object):
                 (master, slave) = pty.openpty()
             except Exception, err:
                 self.logger.log(lp.WARNING, "Error trying to open pty: " + str(err))
+                self.logger.log(lp.WARNING, traceback.format_exc())
+                self.logger.log(lp.WARNING, str(err))
                 raise err
             else:
                 try:
@@ -644,6 +662,8 @@ class RunWith(object):
                 except Exception, err:
                     self.logger.log(lp.WARNING, "Error opening process to pty: " + \
                                 str(err))
+                    self.logger.log(lp.WARNING, traceback.format_exc())
+                    self.logger.log(lp.WARNING, str(err))
                     raise err
                 else:
                     #####
@@ -742,6 +762,8 @@ class RunWith(object):
                 (master, slave) = pty.openpty()
             except Exception, err:
                 self.logger.log(lp.WARNING, "Error trying to open pty: " + str(err))
+                self.logger.log(lp.WARNING, traceback.format_exc())
+                self.logger.log(lp.WARNING, str(err))
                 raise err
             else:
                 try:
@@ -750,6 +772,8 @@ class RunWith(object):
                 except Exception, err:
                     self.logger.log(lp.WARNING, "Error opening process to pty: " + \
                                 str(err))
+                    self.logger.log(lp.WARNING, traceback.format_exc())
+                    self.logger.log(lp.WARNING, str(err))
                     raise err
                 else:
                     #####
@@ -854,7 +878,8 @@ class RunThread(threading.Thread) :
             except Exception, err :
                 self.logger.log(lp.WARNING, "Exception trying to open: " + \
                             str(self.command))
-                self.logger.log(lp.WARNING, "Associated exception: " + str(err))
+                self.logger.log(lp.WARNING, traceback.format_exc())
+                self.logger.log(lp.WARNING, str(err))
                 raise err
 
     ##########################################################################
