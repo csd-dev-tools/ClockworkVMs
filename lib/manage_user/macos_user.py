@@ -818,6 +818,8 @@ class MacOSUser(ParentManageUser):
             except:
                 success = False
                 self.logger.log(lp.INFO, "Exception attempting to chown...")
+                self.logger.log(lp.WARNING, traceback.format_exc())
+                self.logger.log(lp.WARNING, str(err))
                 raise err
             else:
                 success = True
@@ -873,7 +875,8 @@ class MacOSUser(ParentManageUser):
                 shutil.rmtree("/Users/" + str(user))
             except IOError or OSError, err:
                 self.logger.log(lp.INFO, "Exception trying to remove user home...")
-                self.logger.log(lp.INFO, "Exception: " + str(err))
+                self.logger.log(lp.WARNING, traceback.format_exc())
+                self.logger.log(lp.WARNING, str(err))
                 raise err
             else:
                 success = True
