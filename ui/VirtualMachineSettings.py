@@ -151,6 +151,8 @@ class VirtualMachineSettings(QtWidgets.QDialog):
                 self.logger.log(lp.DEBUG, "JSON loaded: " + str(self.jsonData))
             except Exception, err:
                 QtWidgets.QMessageBox.critical(self, "Error", "...Exception trying to read packer json...", QtWidgets.QMessageBox.Ok)
+                self.logger.log(lp.WARNING, traceback.format_exc())
+                self.logger.log(lp.WARNING, str(err))
                 raise err
             else:
                 #####
@@ -620,17 +622,17 @@ class VirtualMachineSettings(QtWidgets.QDialog):
         QtWidgets.QMessageBox.information(self, "Information", "...Saving and Processing VM...", QtWidgets.QMessageBox.Ok)
         #####
         # Save varFile
-        filename = QtGui.QFileDialog.getSaveFileName(self, 'Save File', '.')
-
-        self.saveVarsToJsonFile(filename)
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(self, 'Save File', '.')
+        self.getVarsFromIface()
+        self.saveTemporaryTemplateFile(filename) # saveVarsToJsonFile(filename)
 
     def loadPreviousFile(self):
         '''
         Load previous file (from template directory)
         '''
-        filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File', '.')
-
-        self.loadValuesToUI(filename)
+        filename, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open File', '.')
+        self.loadGuiFromPjh(filename)
+        #self.loadValuesToUI(filename)
 
     def resetToDefault(self):
         '''
