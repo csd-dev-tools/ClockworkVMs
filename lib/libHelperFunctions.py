@@ -66,6 +66,8 @@ def get_console_user():
     except Exception, err:
         logger.log(lp.VERBOSE, "Exception trying to get the console user...")
         logger.log(lp.VERBOSE, "Associated exception: " + str(err))
+        logger.log(lp.WARNING, traceback.format_exc())
+        logger.log(lp.WARNING, str(err))
         raise err
     else:
         """
