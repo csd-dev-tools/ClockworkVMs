@@ -107,7 +107,8 @@ def get_darwin_mac() :
         #  net_hw_addr
     except Exception, err:
         logger.log(lp.VERBOSE, "Error attempting to acquire MAC address...")
-        logger.log(lp.VERBOSE, "Exception: " + str(err))
+        logger.log(lp.WARNING, traceback.format_exc())
+        logger.log(lp.WARNING, str(err))
         raise err
     else :
         net_hw_addr = "No MAC addr found"
