@@ -45,14 +45,21 @@ class PackerJsonHandler():
         '''
         if fname:
             try:
-                jfp = open(fname, 'r')
+                jfp = open(str(fname), 'r')
                 jstuff = json.load(jfp)
             except:
                 trace = traceback.format_exc()
                 self.logger.log(lp.INFO, str(trace))
             else:
                 self.variables = jstuff
-                self.logger.log(lp.DEBUG, "jstuff: " + str(jstuff))
+                print str(jstuff)
+                '''
+                try:
+                    self.logger.log(lp.DEBUG, "jstuff: " + str(jstuff))
+                except Exception, err:
+                    self.logger.log(lp.WARNING, traceback.format_exc())
+                    self.logger.log(lp.WARNING, str(err))
+                '''
             finally:
                 try:
                     jfp.close()
