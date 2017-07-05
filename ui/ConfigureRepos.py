@@ -237,6 +237,8 @@ class ConfigureRepos(QtWidgets.QDialog):
         #####
         # loop through repos and download the ones that have been checked.
         for repo in self.repos2process:
+            if not os.path.exists(self.reposRoot + "/" + repo):
+                subcommand = "clone"
             returnDir = os.getcwd()
             if not 'clone' == subcommand:
                 os.chdir(self.reposRoot + "/" + repo)
