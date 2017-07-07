@@ -109,6 +109,11 @@ class VirtualMachineBuilder(QtWidgets.QMainWindow):
 
         self.chkApp = CheckApplicable(self.environ, self.logger)
         self.macOsBlackListApplicable = {'type': 'black', 'os': {'Mac OS X': ['10.0.0', 'r', '20.12.10']}}
+        self.linuxWhitelistApplicable = {'type' : 'white', 'family' : 'linux'}
+        self.freebsdWhitelistApplicable = {'type' : 'white', 'family' : 'freebsd'}
+        self.macosWhitelistApplicable = {'type' : 'white', 'family' : 'darwin'}
+        #openbsdWhitelistApplicable = {}
+        #windowsWhitelistApplicable = {}
 
         self.refreshComboBoxes()
 
@@ -259,7 +264,39 @@ class VirtualMachineBuilder(QtWidgets.QMainWindow):
 
     def installPacker(self):
         """
-        """
-        ##### After install, allow packer through the application firewall if
-        #     it is turned on.
-        pass
+        ""
+        #####
+        # Check if /usr/local/bin/packer already exists
+        
+        if not os.path.exists("/usr/local/bin/packer"):
+            #####
+            # Check hardware
+            try:
+                sysname, nodename, release, version, machine = os.uname()
+            except Exception, err:
+                raise err
+            
+            #####
+            # determine the correct download URL for packer
+            #
+            # Need method to auto-detect lates version from the repo and auto-select the right one.
+            #
+            if re.match("x86_64", str(machine)) and linuxWhitelistApplicable:
+                packerDownloadUrl = "https://releases.hashicorp.com/packer/1.0.2/packer_1.0.2_linux_386.zip"
+            elif re.match("i386", str(machine)) and linuxWhitelistApplicable:
+                packerDownloadUrl = "https://releases.hashicorp.com/packer/1.0.2/packer_1.0.2_linux_amd64.zip"
+            elif re.match("x86_64", str(machine)) and macosWhitelistApplicable:
+                packerDownloadUrl = "https://releases.hashicorp.com/packer/1.0.2/packer_1.0.2_darwin_amd64.zip"
+            elif re.match("i386", str(machine)) and macosWhitelistApplicable:
+                packerDownloadUrl = "https://releases.hashicorp.com/packer/1.0.2/packer_1.0.2_darwin_386.zip"
+    
+            #####
+            # Download package
+            
+            #####
+            # Install package
+            
+            #####
+            # Check ownership and permissions
+            
+            """
