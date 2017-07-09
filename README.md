@@ -1,4 +1,4 @@
-# VmBuilder
+# ClockworkVMs
 PyQt wrapper for public cloud templates and packer by HashiCorp - https://www.packer.io
 
 VmBuilder provides the ability to download and minimally re-configure cloud templates for building virtual machines.  The first repositories that will be available via this method are the https://github.com/boxcutter repositories:
