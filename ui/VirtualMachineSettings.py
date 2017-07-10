@@ -631,7 +631,10 @@ class VirtualMachineSettings(QtWidgets.QDialog):
         Load previous file (from template directory)
         '''
         filename, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open File', '.')
-        self.loadGuiFromPjh(filename)
+        pjh = PackerJsonHandler(self.logger)
+        jsonFile = pjh.readExistingJsonVarfile(filename)
+        self.loadGuiFromPjh(pjh)
+
         #self.loadValuesToUI(filename)
 
     def resetToDefault(self):
