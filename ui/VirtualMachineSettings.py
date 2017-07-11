@@ -633,7 +633,11 @@ class VirtualMachineSettings(QtWidgets.QDialog):
         # Save varFile
         filename, _ = QtWidgets.QFileDialog.getSaveFileName(self, 'Save File', '.')
         self.getVarsFromIface()
-        self.saveTemporaryTemplateFile(filename) # saveVarsToJsonFile(filename)
+        self.saveTemporaryTemplateFile(filename)
+        templateFile = self.conf.getCurrentTemplateFilePath()
+        dotFile = "." + filename.split("/")[-1] + "_templateFile"
+        dirPath = os.path.dirname(filename)
+        shutil.copy(templateFile, dirPath + "/" + dotFile)
 
     def loadPreviousFile(self):
         '''
@@ -643,8 +647,9 @@ class VirtualMachineSettings(QtWidgets.QDialog):
         pjh = PackerJsonHandler(self.logger)
         jsonFile = pjh.readExistingJsonTemplateFile(filename)
         self.loadGuiFromPjh(pjh)
-
-        #self.loadValuesToUI(filename)
+        dotFile = "." + filename.split("/")[-1] + "_templateFile"
+        dirPath = os.path.dirname(filename)
+        self.conf.setCurrentTemplateFilePath(dirPath + "/" + dotFile)
 
     def resetToDefault(self):
         '''
