@@ -15,3 +15,7 @@ The application should work on all systems that have a functional install of Pyt
 
 ## This is early release software, in development.
 
+External dependancies:
+
+pyOpenSSL - Project relies on pyOpenSSL for creating macos VM's
+
