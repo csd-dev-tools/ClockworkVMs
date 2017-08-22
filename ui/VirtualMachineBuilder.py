@@ -166,15 +166,17 @@ class VirtualMachineBuilder(QtWidgets.QMainWindow):
             self.osSavailable = os.listdir(self.repoRoot)
 
         self.logger.log(lp.DEBUG, str(self.osSavailable))
-        
+
         #####
         # temporarily disconnect Signal/slot to deal with osFamily combo box
+        #
         # It appears that adding values to the combo box changes the combo
         # box index, which throws the currentIndexChanged signal, therefore
         # we have to disconnect the signal, add the combo box values, then
         # set up the signal again.
+        #
         self.ui.osFamily.currentIndexChanged.disconnect(self.osFamilySelected)
-        
+
         if self.osSavailable:
             self.osComboBoxValues = []
             self.ui.osFamily.clear()
@@ -183,7 +185,7 @@ class VirtualMachineBuilder(QtWidgets.QMainWindow):
         else:
             self.configureRepos()
             return 0
-        
+
         self.logger.log(lp.DEBUG, str(self.osComboBoxValues))
 
         self.osVersComboBox = {}
@@ -209,11 +211,11 @@ class VirtualMachineBuilder(QtWidgets.QMainWindow):
             self.osVersComboBox[mydir] = files
             files = []
         self.logger.log(lp.DEBUG, str(self.osVersComboBox))
-        
+
         #####
         # Signal/slot to deal with osFamily combo box change
         self.ui.osFamily.currentIndexChanged.connect(self.osFamilySelected)        
-        
+
     def osFamilySelected(self, index):
         """
         Traslate a combobox position to a string.
@@ -225,10 +227,7 @@ class VirtualMachineBuilder(QtWidgets.QMainWindow):
         self.logger.log(lp.DEBUG, "Index: " + str(index))
 
         if -1 == index :
-            self.logger.log(lp.DEBUG, "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\")
             index = 0
-            self.logger.log(lp.DEBUG, "//////////////////////////////////////")
-            time.sleep(2)
 
         indexText = self.ui.osFamily.itemText(index).strip()
 
