@@ -98,15 +98,6 @@ class VirtualMachineBuilder(QtWidgets.QMainWindow):
         btnTwo.clicked.connect(self.installPacker)
         btnTwo.hide()
 
-        #####
-        # Set up the configure dialog
-        self.configRepos = ConfigureRepos(self.conf)
-        self.configRepos.setWindowTitle("Configure Repos")
-
-        #####
-        # Connect the configure 'done' signal to the refreshComboBoxes slot
-        self.configRepos.doneConfigure.connect(self.refreshComboBoxes)
-
         self.chkApp = CheckApplicable(self.environ, self.logger)
         self.macOsBlackListApplicable = {'type': 'black', 'os': {'Mac OS X': ['10.0.0', 'r', '20.12.10']}}
         self.linuxWhitelistApplicable = {'type' : 'white', 'family' : 'linux'}
@@ -115,61 +106,20 @@ class VirtualMachineBuilder(QtWidgets.QMainWindow):
         #openbsdWhitelistApplicable = {}
         #windowsWhitelistApplicable = {}
 
-        self.refreshComboBoxes()
-
-    def refreshComboBoxes(self):
-        '''
-        Determine what to put in the ComboBoxes
-        '''
         #####
-        # Fill the OS combo box
-        validOSs = ["debian", "ubuntu", "bsd", "macos",
-                    "fedora", "centos", "oraclelinux"]
-        if self.chkApp.isApplicable(self.macOsBlackListApplicable):
-            validOSs.remove('macos')
+        # Set up the configure dialog
+        self.configRepos = ConfigureRepos(self.conf)
+        self.configRepos.setWindowTitle("Configure Repos")
 
-        self.repoRoot = self.conf.getRepoRoot()
+        #####
+        # Connect the configure 'done' signal to the refreshFamilyComboBox slot
+        self.configRepos.doneConfigure.connect(self.refreshFamilyComboBox)
 
-        try:
-            self.osSavailable = os.listdir(self.repoRoot)
-        except OSError, err:
-            os.makedirs(self.repoRoot)
-            self.osSavailable = os.listdir(self.repoRoot)
-
-        self.osComboBoxValues = []
-
-        if self.osSavailable:
-            for myos in self.osSavailable:
-                if myos in validOSs:
-                    self.osComboBoxValues.append(myos)
-                    self.ui.osFamily.addItem(myos)
-        else:
-            self.configureRepos()
-
-        self.ui.osFamily.currentIndexChanged.connect(self.osFamilySelected)
+        #####
+        # Signal/slot to deal with osFamily combo box change
+        self.ui.osFamily.currentIndexChanged.connect(self.osFamilySelected)        
         
-        self.osVersComboBox = {}
-        
-        repoPaths = []
-        files = []
-
-        for mydir in self.osComboBoxValues:
-            mydirlist = os.listdir(self.conf.getRepoRoot() + "/" + mydir)
-            for item in mydirlist:
-                if re.match("^\w+\d+.*\.json", item) and \
-                   re.search("%s"%mydir, item):
-                    files.append(item)
-                    self.logger.log(lp.DEBUG, str(item))
-                elif re.match("^ol\d+.*\.json", item):
-                    files.append(item)
-                    self.logger.log(lp.DEBUG, str(item))
-                elif re.match("^win.*\.json", item):
-                    files.append(item)
-                    self.logger.log(lp.DEBUG, str(item))
-                    
-            self.osVersComboBox[mydir] = files
-            self.logger.log
-            files = []
+        self.refreshFamilyComboBox()
         self.osFamilySelected(0)
         
     def setOpenExternalLinks(self, set_state=True):
@@ -196,6 +146,74 @@ class VirtualMachineBuilder(QtWidgets.QMainWindow):
 
         return success
 
+    def refreshFamilyComboBox(self):
+        '''
+        Determine what to put in the ComboBoxes
+        '''
+        #####
+        # Fill the OS combo box
+        validOSs = ["debian", "ubuntu", "bsd", "macos",
+                    "fedora", "centos", "oraclelinux"]
+        if self.chkApp.isApplicable(self.macOsBlackListApplicable):
+            validOSs.remove('macos')
+
+        self.repoRoot = self.conf.getRepoRoot()
+
+        try:
+            self.osSavailable = os.listdir(self.repoRoot)
+        except OSError, err:
+            os.makedirs(self.repoRoot)
+            self.osSavailable = os.listdir(self.repoRoot)
+
+        self.logger.log(lp.DEBUG, str(self.osSavailable))
+        
+        #####
+        # temporarily disconnect Signal/slot to deal with osFamily combo box
+        # It appears that adding values to the combo box changes the combo
+        # box index, which throws the currentIndexChanged signal, therefore
+        # we have to disconnect the signal, add the combo box values, then
+        # set up the signal again.
+        self.ui.osFamily.currentIndexChanged.disconnect(self.osFamilySelected)
+        
+        if self.osSavailable:
+            self.osComboBoxValues = []
+            self.ui.osFamily.clear()
+            self.ui.osFamily.addItems(self.osSavailable)
+            self.osComboBoxValues += self.osSavailable
+        else:
+            self.configureRepos()
+            return 0
+        
+        self.logger.log(lp.DEBUG, str(self.osComboBoxValues))
+
+        self.osVersComboBox = {}
+        repoPaths = []
+        files = []
+
+        self.logger.log(lp.DEBUG, str(self.osComboBoxValues))
+
+        for mydir in self.osComboBoxValues:
+            mydirlist = os.listdir(self.conf.getRepoRoot() + "/" + mydir)
+            for item in mydirlist:
+                if re.match("^\w+\d+.*\.json", item) and \
+                   re.search("%s"%mydir, item):
+                    files.append(item)
+                    self.logger.log(lp.DEBUG, str(item))
+                elif re.match("^ol\d+.*\.json", item):
+                    files.append(item)
+                    self.logger.log(lp.DEBUG, str(item))
+                elif re.match("^win.*\.json", item):
+                    files.append(item)
+                    self.logger.log(lp.DEBUG, str(item))
+                    
+            self.osVersComboBox[mydir] = files
+            files = []
+        self.logger.log(lp.DEBUG, str(self.osVersComboBox))
+        
+        #####
+        # Signal/slot to deal with osFamily combo box change
+        self.ui.osFamily.currentIndexChanged.connect(self.osFamilySelected)        
+        
     def osFamilySelected(self, index):
         """
         Traslate a combobox position to a string.
@@ -203,10 +221,21 @@ class VirtualMachineBuilder(QtWidgets.QMainWindow):
         @author: Roy Nielsen
         """
         self.ui.osVersions.clear()
+
         self.logger.log(lp.DEBUG, "Index: " + str(index))
-        
-        indexText = self.ui.osFamily.itemText(index)
+
+        if -1 == index :
+            self.logger.log(lp.DEBUG, "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\")
+            index = 0
+            self.logger.log(lp.DEBUG, "//////////////////////////////////////")
+            time.sleep(2)
+
+        indexText = self.ui.osFamily.itemText(index).strip()
+
+        self.logger.log(lp.DEBUG, str(indexText))
+
         for osVersVarsFile in self.osVersComboBox[indexText]:
+            self.logger.log(lp.DEBUG, str(osVersVarsFile))
             self.ui.osVersions.addItem(osVersVarsFile)
 
     def configureRepos(self):
