@@ -14,7 +14,8 @@ import sys
 import inspect
 
 from ..loggers import LogPriority as lp
-from ..libHelperExceptions import UnsupportedOSError
+from ..loggers import CyLogger
+from ..libHelperExceptions import UnsupportedOSError, NotACyLoggerError
 
 class ManageKeychain(object):
     """
@@ -35,18 +36,22 @@ class ManageKeychain(object):
 
     #----------------------------------------------------------------------
 
-    def __init__(self, logger=False):
+    def __init__(self, logger):
         """
         Class initialization method
         """
         #####
         # Set up logging
-        self.logger = logger
+        if isinstance(logger, CyLogger):
+            self.logger = logger
+        else:
+            raise NotACyLoggerError("Passed in value for logger is invalid, try again.")
+
         self.logger.log(lp.INFO, "Logger: " + str(self.logger))
 
         if sys.platform.lower() == "darwin":
             self.logger.log(lp.DEBUG, "Loading Mac keychain manager...")
-            from .macos_keychain import MacOSKeychain
+            from ..manage_keychain.macos_keychain import MacOSKeychain
             self.keychainMgr = MacOSKeychain(logDispatcher=self.logger)
         else:
             raise UnsupportedOSError("This operating system is not supported...")

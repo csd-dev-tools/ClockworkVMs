@@ -4,11 +4,12 @@
 
 #####
 # Set this variable to exclude file resource forks from
-# tar archives.
+# tar archives on macOS.
 export COPYFILE_DISABLE=true
 
-APPNAME="PNpass"
+APPNAME="ClockworkVMs"
 APPVERSION="0.9.4.1"
+APPICON=""
 
 PERL="/usr/bin/perl"
 MV="/bin/mv"
@@ -39,7 +40,7 @@ export LD_LIBRARY_PATH=/opt/tools/lib/Qt5.6.1/lib:/opt/tools/lib/Python/2.7/site
 
 #####
 # Change version string in Lanl_Fv2.py
-${ECHO} "Changing version string in Lanl_Fv2..."
+${ECHO} "Changing version string in ${APPNAME}..."
 SEDSTRING="s/\d+\.\d+\.\d+\.\d+/$APPVERSION/"
 ${PERL} -pe ${SEDSTRING} ./${APPNAME}.py > ./${APPNAME}.py.new
 $RM ./${APPNAME}.py
@@ -48,16 +49,17 @@ $MV ./${APPNAME}.py.new ./${APPNAME}.py
 ###################################################
 # to compile the UI:
 ${ECHO} "Compiling Qt ui files to a python files..."
-${PYUIC} ui/elevator.ui > ui/elevator_ui.py
-${PYUIC} ui/general_warning.ui > ui/general_warning_ui.py
-${PYUIC} ui/PropertyNumberRequest_ui.ui > ui/PropertyNumberRequest_ui.py
+${PYUIC} ui/ConfigureRepos.ui > ui/ConfigureRepos_ui.py
+${PYUIC} ui/admin_credentials.ui > ui/admin_credentials_ui.py
+${PYUIC} ui/PrepareIso.ui > ui/PrepareIso_ui.py
+${PYUIC} ui/VirtualMachineBuilder.ui > ui/VirtualMachineBuilder_ui.py
+${PYUIC} ui/VMSettings_ui.ui > ui/VirtualMachineSettings_ui.py
 
 ###################################################
 # to compile a pyinstaller spec file for app creation:
 ${ECHO} "Creating a pyinstaller spec file for the project..."
-#/Users/Shared/Frameworks/pyinstaller/pyinstaller-dev/utils/Makespec.py -w $APPNAME.py
 #${PYINSTALLER_MAKESPEC} -w ${APPNAME}.py --noupx 
-${PYINSTALLER_MAKESPEC}  -D -d --noupx -i oxLock.icns -w -p /opt/tools/lib/Python/2.7/site-packages/PyQt5:/opt/tools/Qt5.6.1/lib:/opt/tools/lib/Python/2.7/site-packages:/opt/tools/lib/Python/2.7/site-packages/sip/PyQt5:/opt/tools/bin:/usr/lib --osx-bundle-identifier gov.lanl.PNpass ./${APPNAME}.py &> pyinstaller_makespec.log
+${PYINSTALLER_MAKESPEC}  -D -d --noupx -i ${APPICON} -w -p /opt/tools/lib/Python/2.7/site-packages/PyQt5:/opt/tools/Qt5.6.1/lib:/opt/tools/lib/Python/2.7/site-packages:/opt/tools/lib/Python/2.7/site-packages/sip/PyQt5:/opt/tools/bin:/usr/lib --osx-bundle-identifier gov.lanl.${APPNAME} ./${APPNAME}.py &> pyinstaller_makespec.log
 
 ###################################################
 #to build:
@@ -65,13 +67,7 @@ ${PYINSTALLER_MAKESPEC}  -D -d --noupx -i oxLock.icns -w -p /opt/tools/lib/Pytho
 # SET THE APP VERSION IN THE SPEC FILE
 
 ${ECHO} "Building the app..."
-#/Users/Shared/Frameworks/pyinstaller/pyinstaller-dev/utils/Build.py -y $APPNAME.spec 
-#${PYINSTALLER_BUILD} -y --clean --workpath=/tmp ${APPNAME}.spec --onefile
 ${PYINSTALLER_BUILD} -y --clean ${APPNAME}.spec --log-level=DEBUG &> pyinstaller_build.log 
-
-#/Users/Shared/Frameworks/pyinstaller-beta/pyinstaller/utils/Build.py -y $APPNAME.spec 
-echo "Copying necessary files to the Resources directory..."
-# $CP -a ~/QtSDK/Desktop/Qt/4.8.1/gcc/lib/QtGui.framework/Resources/qt_menu.nib dist/$APPNAME.app/Contents/Resources/
 
 ######
 # edit the .app's Info.plist & change the default value for CFBundleIconFile to your icon file (must be an icns file)
@@ -102,18 +98,16 @@ fi
 
 #####
 # Copy files to the resources directory
-${CP} oxLock.icns ./dist/${APPNAME}.app/Contents/Resources
-${CP} -a dist/PnWork ./dist/${APPNAME}.app/Contents/Resources
-${CP} eca.pem ./dist/${APPNAME}.app/Contents/Resources/PnWork/.eca.pem
+${CP} ${APPICON} ./dist/${APPNAME}.app/Contents/Resources
 
 /bin/sync
 /bin/sync
 
 #####
 # Sign the app before packaging:
-UNLOCK_KEYCHAIN_OUTPUT=`/usr/bin/security unlock-keychain /Users/don/Library/Keychains/login.keychain-db`
+UNLOCK_KEYCHAIN_OUTPUT=`/usr/bin/security unlock-keychain ${HOME}/Library/Keychains/login.keychain-db`
 /bin/echo ${UNLOCK_KEYCHAIN_OUTPUT}
-SIGNING_OUTPUT=`/usr/bin/codesign -vvvv --deep -f -s 'Mac Developer:' --keychain="/Users/${HOME}/Library/Keychains/login.keychain-db" ./dist/PNpass.app`
+SIGNING_OUTPUT=`/usr/bin/codesign -vvvv --deep -f -s 'Mac Developer:' --keychain="${HOME}/Library/Keychains/login.keychain-db" ./dist/PNpass.app`
 /bin/echo ${SIGNING_OUTPUT}
 
 #####

@@ -39,26 +39,23 @@ Created on Aug 24, 2010
 @author: dkennel
 @change: 2014/05/29 - ekkehard j. koch - pep8 and comment updates
 @change: 2017/03/07 - dkennel - added fisma risk level support
+@change: 2017.09/01 - rsn - taking out stonix specifics
 '''
 import os
 import re
+import platform
+import pwd
 import sys
 import socket
 import subprocess
-import types
-import platform
-import pwd
 import time
-try:
-    from localize import CORPORATENETWORKSERVERS
-except:
-    CORPORATENETWORKSERVERS = None
 
 try:
     from localize import VERSION
 except:
     VERSION = '0.0.1'
 
+# FISMACAT must be one of ['high', 'medium', 'low']
 try:
     from localize import FISMACAT
 except:
@@ -68,14 +65,13 @@ if os.geteuid() == 0:
     try:
         import dmidecode
         DMI = True
-    except(ImportError):
+    except ImportError:
         DMI = False
 else:
     DMI = False
 
 
-class Environment:
-
+class Environment(object):
     """
     The Environment class collects commonly used information about the
     execution platform and makes it available to the rules.
@@ -95,9 +91,16 @@ class Environment:
         self.version = VERSION
         self.euid = os.geteuid()
         currpwd = pwd.getpwuid(self.euid)
+        self.test_mode = ""
+        self.script_path = ""
+        self.resources_path = ""
+        self.rules_path = ""
+        self.log_path = ""
+        self.icon_path = ""
+        self.conf_path = ""
         try:
             self.homedir = currpwd[5]
-        except(IndexError):
+        except IndexError:
             self.homedir = '/dev/null'
         self.installmode = False
         self.verbosemode = False
@@ -106,32 +109,6 @@ class Environment:
         self.systemfismacat = 'low'
         self.determinefismacat()
         self.collectinfo()
-
-    def setinstallmode(self, installmode):
-        """
-        Set the install mode bool value. Should be true if the prog should run
-        in install mode.
-
-        @param bool: installmode
-        @return: void
-        @author: D. Kennel
-        """
-        try:
-            if type(installmode) is types.BooleanType:
-                self.installmode = installmode
-        except (NameError):
-            # installmode was undefined
-            pass
-
-    def getinstallmode(self):
-        """
-        Return the current value of the install mode bool. Should be true if
-        the program is to run in install mode.
-
-        @return: bool : installmode
-        @author: D. Kennel
-        """
-        return self.installmode
 
     def setverbosemode(self, verbosemode):
         """
@@ -143,9 +120,9 @@ class Environment:
         @author: D. Kennel
         """
         try:
-            if type(verbosemode) is types.BooleanType:
+            if isinstance(verbosemode, bool):
                 self.verbosemode = verbosemode
-        except (NameError):
+        except NameError:
             # verbosemode was undefined
             pass
 
@@ -169,9 +146,9 @@ class Environment:
         @author: D. Kennel
         """
         try:
-            if type(debugmode) is types.BooleanType:
+            if isinstance(bool, debugmode):
                 self.debugmode = debugmode
-        except (NameError):
+        except NameError:
             # debugmode was undefined
             pass
 
@@ -408,14 +385,14 @@ class Environment:
             iplist = ipdata[2]
             try:
                 iplist.remove('127.0.0.1')
-            except (ValueError):
+            except ValueError:
                 # tried to remove loopback when it's not present, continue
                 pass
             if len(iplist) >= 1:
                 ipaddress = iplist[0]
             else:
                 ipaddress = '127.0.0.1'
-        except(socket.gaierror):
+        except socket.gaierror:
             # If we're here it's because socket.getfqdn did not in fact return
             # a valid hostname and gethostbyname errored.
             ipaddress = self.getdefaultip()
@@ -462,14 +439,14 @@ class Environment:
                                             stdout=subprocess.PIPE,
                                             close_fds=True)
                 routedata = routecmd.stdout.readlines()
-            except(OSError):
+            except OSError:
                 return ipaddr
             for line in routedata:
                 if re.search('^default', line):
                     line = line.split()
                     try:
                         gateway = line[1]
-                    except(IndexError):
+                    except IndexError:
                         return ipaddr
         else:
             try:
@@ -481,14 +458,14 @@ class Environment:
                                             stdout=subprocess.PIPE,
                                             close_fds=True)
                 routedata = routecmd.stdout.readlines()
-            except(OSError):
+            except OSError:
                 return ipaddr
             for line in routedata:
                 if re.search('gateway:', line):
                     line = line.split()
                     try:
                         gateway = line[1]
-                    except(IndexError):
+                    except IndexError:
                         return ipaddr
         if gateway:
             iplist = self.getallips()
@@ -543,7 +520,7 @@ class Environment:
                                          stdout=subprocess.PIPE,
                                          close_fds=True)
                 ifdata = ifcmd.stdout.readlines()
-            except(OSError):
+            except OSError:
                 return iplist
             for line in ifdata:
                 if re.search('inet addr:', line):
@@ -553,7 +530,7 @@ class Environment:
                         addr = addr.split(':')
                         addr = addr[1]
                         iplist.append(addr)
-                    except(IndexError):
+                    except IndexError:
                         continue
         else:
             try:
@@ -565,7 +542,7 @@ class Environment:
                                          stdout=subprocess.PIPE,
                                          close_fds=True)
                 ifdata = ifcmd.stdout.readlines()
-            except(OSError):
+            except OSError:
                 return iplist
             for line in ifdata:
                 if re.search('inet ', line):
@@ -573,44 +550,9 @@ class Environment:
                         line = line.split()
                         addr = line[1]
                         iplist.append(addr)
-                    except(IndexError):
+                    except IndexError:
                         continue
         return iplist
-
-    def get_property_number(self):
-        """
-        Find and return the
-        Property number of the local machine
-        @author: scmcleni
-        @author: D. Kennel
-        @return: int
-        """
-        propnum = 0
-        try:
-            if os.path.exists('/etc/property-number'):
-                propertynumberfile = open('/etc/property-number', 'r')
-                propnum = propertynumberfile.readline()
-                propnum = propnum.strip()
-                propertynumberfile.close()
-            elif DMI and self.euid == 0:
-                chassis = dmidecode.chassis()
-                for key in chassis:
-                    propnum = chassis[key]['data']['Asset Tag']
-            if platform.system() == 'Darwin':
-                pnfetch = '/usr/sbin/nvram asset_id 2>/dev/null'
-                cmd = subprocess.Popen(pnfetch, shell=True,
-                                       stdout=subprocess.PIPE,
-                                       close_fds=True)
-                cmdout = cmd.stdout.readline()
-                cmdout = cmdout.split()
-                try:
-                    propnum = cmdout[1]
-                except(IndexError, KeyError):
-                    propnum = 0
-        except:
-            pass
-            # Failed to obtain property number
-        return propnum
 
     def get_system_serial_number(self):
         """
@@ -826,44 +768,6 @@ class Environment:
                     break
         return issnitchactive
 
-    def oncorporatenetwork(self):
-        """
-        Determine if we are running on the corporate network
-
-        @return: amoncorporatenetwork
-        @rtype: bool
-        @author: ekkehard j. koch
-        @change: Breen Malmberg - 2/28/2017 - added logic to ensure that this
-                code only runs if the constant, CORPORATENETWORKSERVERS, is
-                properly defined and not set to 'None', in localize.py;
-                minor doc string edit; note: no logging facility available in
-                environment, so can't log when CORPORATENETWORKSERVERS
-                is undefined or None...
-        """
-
-        amoncorporatenetwork = False
-
-        # return False if the constant CORPORATENETWORKSERVERS is
-        # either set to 'None' or not defined, in localize.py
-        if CORPORATENETWORKSERVERS == None:
-            print str(os.path.basename(__file__)) + " :: " + str(self.oncorporatenetwork.__name__) + " :: " + str("The constant CORPORATENETWORKSERVERS has not been properly defined in localize.py")
-            return amoncorporatenetwork
-        elif not CORPORATENETWORKSERVERS:
-            print str(os.path.basename(__file__)) + " :: " + str(self.oncorporatenetwork.__name__) + " :: " + str("The constant CORPORATENETWORKSERVERS has not been properly defined in localize.py")
-            return amoncorporatenetwork
-        else:
-            listOfServers = CORPORATENETWORKSERVERS
-            for server in listOfServers:
-                try:
-                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    sock.connect((server, 80))
-                    sock.close()
-                    amoncorporatenetwork = True
-                    return amoncorporatenetwork
-                except (socket.gaierror, socket.timeout, socket.error):
-                    amoncorporatenetwork = False
-        return amoncorporatenetwork
-
     def collectpaths(self):
         """
         Determine how stonix is run and return appropriate paths for:
@@ -877,12 +781,12 @@ class Environment:
         """
         try:
             script_path_zero = sys._MEIPASS
-        except Exception:
+        except AttributeError:
             script_path_zero = os.path.realpath(sys.argv[0])
 
         try:
             script_path_one = os.path.realpath(sys.argv[1])
-        except:
+        except IndexError:
             script_path_one = ""
 
         self.test_mode = False
@@ -899,7 +803,8 @@ class Environment:
             # the "stonix" binary blob created by pyinstaller, so don't include
             # here.
             #print "DEBUG: Environment.collectpaths: unexpected argv[0]: " + str(sys.argv[0])
-            if re.search("stonix.py$", script_path_one) or re.search("stonixtest.py$", script_path_one):
+            if re.search("stonix.py$", script_path_one) or \
+               re.search("stonixtest.py$", script_path_one):
                 script = script_path_one.split("/")[-1]
                 script_path = "/".join(script_path_one.split("/")[:-1])
 
@@ -915,7 +820,7 @@ class Environment:
                 #print "DEBUG: Cannot find appropriate path, building paths for current directory"
                 try:
                     self.script_path = sys._MEIPASS
-                except Exception:
+                except AttributeError:
                     self.script_path = os.path.dirname(os.path.realpath(sys.argv[0]))
 
         #####
@@ -927,7 +832,7 @@ class Environment:
         #####
         # create the self.rules_path
         self.rules_path = self.resources_path + "/rules"
-        
+
         #####
         # Set the log file path
         if self.geteuid() == 0:
@@ -1033,7 +938,7 @@ class Environment:
         @param num: int - number of rules that apply to this host
         @author: dkennel
         '''
-        if type(num) is not int:
+        if isinstance(int, num):
             raise TypeError('Number of rules must be an integer')
         elif num < 0:
             raise ValueError('Number of rules must be a positive integer')

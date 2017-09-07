@@ -10,7 +10,8 @@ import sys
 import inspect
 
 from ..loggers import LogPriority as lp
-from ..libHelperExceptions import UnsupportedOSError
+from ..loggers import CyLogger
+from ..libHelperExceptions import UnsupportedOSError, NotACyLoggerError
 
 
 class ManageUser(object):
@@ -19,13 +20,16 @@ class ManageUser(object):
 
     #----------------------------------------------------------------------
 
-    def __init__(self, logger=False):
+    def __init__(self, logger):
         """
         Class initialization method
         """
         #####
         # Set up logging
-        self.logger = logger
+        if isinstance(logger, CyLogger):
+            self.logger = logger
+        else:
+            raise NotACyLoggerError("Passed in value for logger is invalid, try again.")
         self.logger.log(lp.INFO, "Logger: " + str(self.logger))
 
         if sys.platform.lower() == "darwin":
@@ -133,6 +137,26 @@ class ManageUser(object):
         # Postprocess logging
         self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
         return success
+
+    #----------------------------------------------------------------------
+
+    def getUserProperties(self, userName=""):
+        """
+        Get information about the passed in user.
+        """
+        success = False
+        properties = {}
+        #####
+        # Preprocess logging
+        self.logger.log(lp.DEBUG, "processing:" + "")
+        self.__calledBy()
+        #####
+        # Call factory created object's mirror method
+        success, properties = self.userMgr.getUserProperties(userName)
+        #####
+        # Postprocess logging
+        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        return success, properties
 
     #----------------------------------------------------------------------
 

@@ -23,7 +23,14 @@ from .loggers import CyLogger
 from .loggers import LogPriority as lp
 from .get_libc import getLibc
 
-def OSNotValidForRunWith(Exception):
+def OSNotValidForRunWith(BaseException):
+    """
+    Custom Exception
+    """
+    def __init__(self, *args, **kwargs):
+        Exception.__init__(self, *args, **kwargs)
+
+def NotACyLoggerError(BaseException):
     """
     Custom Exception
     """
@@ -57,8 +64,11 @@ class RunWith(object):
 
     @author: Roy Nielsen
     """
-    def __init__(self, logger=False):
-        self.logger = logger
+    def __init__(self, logger, dbmode=lp.INFO):
+        if isinstance(logger, CyLogger):
+            self.logger = logger
+        else:
+            raise NotACyLoggerError("Passed in value for logger is invalid, try again.")
         self.command = None
         self.output = None
         self.error = None
@@ -76,6 +86,7 @@ class RunWith(object):
 
         @author: Roy Nielsen
         """
+        success = False
         if command:
             self.command = command
         #####
@@ -849,18 +860,18 @@ class RunThread(threading.Thread) :
         self.reterr = None
         self.shell = myshell
         threading.Thread.__init__(self)
-        """
+
         if isinstance(self.command, types.ListType) :
             self.shell = True
             self.printcmd = " ".join(self.command)
         if isinstance(self.command, types.StringTypes) :
             self.shell = False
             self.printcmd = self.command
-        """
-        if not isinstance(logger, (bool, CyLogger)):
-            self.logger = CyLogger()
-        else:
+
+        if isinstance(logger, CyLogger):
             self.logger = logger
+        else:
+            raise NotACyLoggerError("Passed in value for logger is invalid, try again.")
 
         self.logger.log(lp.INFO, "Initialized runThread...")
 
@@ -881,6 +892,22 @@ class RunThread(threading.Thread) :
                 self.logger.log(lp.WARNING, traceback.format_exc())
                 self.logger.log(lp.WARNING, str(err))
                 raise err
+            else :
+                try:
+                    self.retout, self.reterr = p.communicate()
+                except Exception, err :
+                    self.logger.log(lp.WARNING, "Exception trying to open: " + \
+                               str(self.printcmd))
+                    self.logger.log(lp.WARNING, "Associated exception: " + str(err))
+                    raise err
+                else :
+                    #logMessage("Return values: ", "debug", self.message_level)
+                    #logMessage("retout: " + str(self.retout),
+                    #           "debug", self.message_level)
+                    #logMessage("reterr: " + str(self.reterr),
+                    #           "debug", self.message_level)
+                    self.logger.log(lp.WARNING, "Finished \"run\" of: " + \
+                                str(self.printcmd))
 
     ##########################################################################
 
@@ -914,6 +941,8 @@ def runMyThreadCommand(cmd=[], logger=False, myshell=False) :
     """
     retval = None
     reterr = None
+    if not isinstance(logger, CyLogger):
+        raise NotACyLoggerError("Passed in value for logger is invalid, try again.")
     print str(cmd)
     print str(logger)
     if cmd and logger :

@@ -82,6 +82,78 @@ def get_console_user():
 
 ###########################################################################
 
+def get_darwin_mac() :
+    """
+    Get the mac address and place it in net_hw_addr
+
+    Future METHOD: Use the "ifconfig" command - look for the "active" interface
+    - collect "interface", "mac", "ipaddr" to return.  PATH to ifconfig may be
+    specific to the Mac.
+
+    Description:   Runs the networksetup -listallhardwareports,
+                   processing the output to get the network interface mac
+                   address.  Specific to the Mac.
+
+    @author: Roy Nielsen
+    """
+    found = 0
+
+    output = Popen(["/usr/sbin/networksetup", "-listallhardwareports"], stdout=PIPE, stderr=STDOUT).communicate()[0]
+
+    try :
+        for line in output.split("\n") :
+            match_hw_addr = re.compile \
+            ("^Ethernet Address:\s+(\w+:\w+:\w+:\w+:\w+:\w+)\s*$")
+
+            if re.match("^Device:\s+(\w+)\s*$", line) :
+                found = 1
+            if re.match \
+              ("^Ethernet Address:\s+(\w+:\w+:\w+:\w+:\w+:\w+)\s*$", \
+              line) and found == 1 :
+                raise FoundException
+    except FoundException :
+        hw_addr = match_hw_addr.search(line)
+        net_hw_addr = hw_addr.group(1)
+        #  net_hw_addr
+    except Exception, err:
+        logger.log(lp.VERBOSE, "Error attempting to acquire MAC address...")
+        logger.log(lp.VERBOSE, "Exception: " + str(err))
+        raise err
+    else :
+        net_hw_addr = "No MAC addr found"
+        logger.log(lp.VERBOSE, "No MAC address found")
+
+    return net_hw_addr
+
+###########################################################################
+
+def is_laptop():
+    """
+    Determine if the machine this is currently running on is a laptop
+    
+    @author: Roy Nielsen
+    """
+    isThisALaptop = False
+    
+    cmd = ["/usr/sbin/system_profiler", "SPHardwareDataType"]
+    
+    retval, reterr = Popen(cmd, stdout=PIPE, stderr=PIPE).communicate()
+    
+    if not reterr :
+        if retval :
+            for line in retval.split("\n") :
+                if re.match("^\s+Model Name:", line) :
+                    if re.search("[bB]ook", line) :
+                        isThisALaptop = True
+                        break
+        else :
+            logger.log(lp.VERBOSE, "Error processing system_profiler output...")
+    else :
+        logger.log(lp.VERBOSE, "Error processing system_profiler output: " + str(reterr))
+    return isThisALaptop
+
+###########################################################################
+
 def touch(filename=""):
     """
     Python implementation of the touch command..
@@ -97,6 +169,75 @@ def touch(filename=""):
                 open(filename, 'a').close()
             except Exception, err :
                 logger.log(lp.INFO, "Cannot open to touch: " + str(filename))
+
+###########################################################################
+
+def installFdeUser(myusername="", mypassword="") :
+    """
+    Create an input plist for the fdesetup command to enable a user in the 
+    filevault login screen
+
+    @author: Roy Nielsen
+    """
+    success = False
+    logger.log(lp.DEBUG, "Starting installFdeUser...")
+    
+    if re.match("^\s*$", myusername) :
+        logger.log(lp.INFO, "Empty username: '" + str(myusername) + "'")
+
+    elif re.match("^\s*$", mypassword) :
+        logger.log(lp.INFO, "Empty password: '" + str(mypassword) + "'")
+        
+    if re.match("^\s*$", myusername) or re.match("^\s*$", mypassword) :
+        logger.log(lp.INFO, "in buildInputPlist -- cannot build the plist with an empty username or password...")
+        return success
+
+    plist = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + \
+            "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n" + \
+            "<plist version=\"1.0\">\n" + \
+            "\t<dict>\n" + \
+            "\t\t<key>Username</key>\n" + \
+            "\t\t<string>" + str(myusername) + "</string>\n" + \
+            "\t\t<key>Password</key>\n" + \
+            "\t\t<string>" + str(mypassword) + "</string>\n" + \
+            "\t</dict>\n</plist>"
+
+    #####
+    # Do the fdesetup command
+    cmd = ["/usr/bin/fdesetup", "enable", "-outputplist", "-inputplist"]
+    logger.log(lp.DEBUG, "Command: " + str(cmd))
+
+    proc = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    
+    (retval, reterr) = proc.communicate(plist + "\n")
+    
+    logger.log(lp.DEBUG, "retval: " + str(retval))
+    logger.log(lp.DEBUG, "reterr: " + str(reterr))
+
+    if not reterr:
+        success = True
+    
+    logger.log(lp.DEBUG, "Installed an Fde User...")
+    return success
+
+###########################################################################
+
+def removeFdeUser(myusername=""):
+    """
+    Remove a user from the FDE login screen
+    
+    @author: Roy Nielsen
+    """
+    success = False
+    if re.match("^\s+$", myusername) or not myusername:
+        logger.log(lp.INFO, "Empty username: '" + str(myusername) + "'")
+        return success
+    cmd = ["/usr/bin/fdesetup", "remove", myusername]
+    run.setCommand(cmd)
+    run.communicate()
+    if not run.getStderr():
+        success = True
+    return success
 
 ###########################################################################
 
