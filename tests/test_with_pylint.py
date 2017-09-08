@@ -38,7 +38,7 @@ def getDirList(targetDir="."):
             filesList.append(os.path.abspath(os.path.join(targetDir, myfile)))
     return filesList
 
-def genTestData(fileList=[]):
+def genTestData(fileList=[], excludeFiles=[], excludeFromLines=[]):
     test_case_data = []
     if not fileList:
         print "Cannot generate data from nothing..."
