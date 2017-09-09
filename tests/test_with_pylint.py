@@ -24,7 +24,7 @@ logger.initializeLogs()
 
 def getRecursiveTree(targetRootDir="."):
     filesList = []
-    for root, dirs, files in os.walk(dirPkgRoot):
+    for root, dirs, files in os.walk(targetRootDir):
         for myfile in files:
             if re.search(".+\.py$", myfile): 
                 filesList.append(os.path.abspath(os.path.join(root, myfile)))
@@ -40,8 +40,12 @@ def getDirList(targetDir="."):
 def genTestData(fileList=[], excludeFiles=[], excludeFromLines=[]):
     test_case_data = []
 
+    #print str(excludeFiles)
+    #print str(excludeFromLines)
+
+
     if not fileList:
-        print "Cannot generate data from nothing..."
+        #print "Cannot generate data from nothing..."
         sys.exit(1)
 
     pIface = PylintIface(logger)
@@ -63,14 +67,18 @@ def genTestData(fileList=[], excludeFiles=[], excludeFromLines=[]):
                 for item in jsonData:
                     if re.match("^error$", item['type']) or re.match("^fatal$", item['type']):
                         #print "Found: " + str(item['type']) + " (" + str(item['line']) + ") : " + str(item['message'])
+                        item['message'] = re.sub("'", "", item['message'])
                         #####
                         # Don't include json data that has a string from the
                         # excludeLinesWith exclude list.
                         # that contain a search string in excludeFromLines
+                        found = False
                         for searchItem in excludeFromLines:
+                            #print searchItem
                             if re.search("%s"%searchItem, item['message']):
-                                continue
-                        test_case_data.append((myfile, item['line'], item['message']))
+                                found = True
+                        if not found:
+                                test_case_data.append((myfile, item['line'], item['message']))
         except AttributeError:
             pass
     #for data in test_case_data:
@@ -176,6 +184,13 @@ if __name__=="__main__":
     '''
 
     test_case_data = []
+    '''
+    print "\n\n"
+    print str(opts.doFiles)
+    print opts.dirToCheck
+    print os.path.abspath(opts.treeRoot)
+    print "\n\n"
+    '''
 
     if not opts.treeRoot and not opts.dirToCheck and not opts.doFiles:
         print "\n\n\nNeed to choose a file acquisition method.\n\n"
@@ -186,19 +201,14 @@ if __name__=="__main__":
         #####
         # Run unittest per options
         if opts.treeRoot:
-            test_case_data = test_case_data + genTestData(getRecursiveTree(opts.treeRoot), opts.excludeFiles, opts.excludeLinesWith)
-        elif opts.dirToCheck:
+            test_case_data = test_case_data + genTestData(getRecursiveTree(os.path.abspath(opts.treeRoot)), opts.excludeFiles, opts.excludeLinesWith)
+        if opts.dirToCheck:
             test_case_data = test_case_data + genTestData(getDirList(opts.dirToCheck), opts.excludeFiles, opts.excludeLinesWith)
-        elif opts.doFiles:
+        if opts.doFiles:
             test_case_data = test_case_data + genTestData(opts.doFiles, opts.excludeFiles, opts.excludeLinesWith)
 
-    for specificError in test_case_data:
-        #print str(specificError)
-        myfile, lineNum, text = specificError
-        test_name = "test_with_pylint_{0}_{1}_{2}".format("_".join("_".join(myfile.split("/")).split(".")), lineNum, "_".join("_".join(text.split(" ")).split("'")))
-        #print test_name
-        error_case = pylint_test_template(*specificError)
-        setattr(test_with_pylint_errors, test_name, error_case)
+    #for item in test_case_data:
+    #    print item
 
     #####
     # Initialize the test suite
@@ -213,7 +223,6 @@ if __name__=="__main__":
         setattr(test_with_pylint_errors, test_name, error_case)
 
     test_suite.addTest(unittest.makeSuite(test_with_pylint_errors))
-    #test_suite.addTest(unittest.makeSuite(ConfigTestCase))
     runner = unittest.TextTestRunner()
     testResults  = runner.run(test_suite)  # output goes to stderr
 
@@ -226,6 +235,7 @@ else:
         #print str(specificError)
         myfile, lineNum, text = specificError
         test_name = "test_with_pylint_{0}_{1}_{2}".format("_".join("_".join(myfile.split("/")).split(".")), lineNum, "_".join("_".join(text.split(" ")).split("'")))
-        print test_name
+        #print test_name
         error_case = pylint_test_template(*specificError)
         setattr(test_with_pylint_errors, test_name, error_case)
+
