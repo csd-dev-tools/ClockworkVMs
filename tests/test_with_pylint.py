@@ -39,6 +39,7 @@ def getDirList(targetDir="."):
 
 def genTestData(fileList=[], excludeFiles=[], excludeFromLines=[]):
     test_case_data = []
+
     if not fileList:
         print "Cannot generate data from nothing..."
         sys.exit(1)
@@ -46,6 +47,10 @@ def genTestData(fileList=[], excludeFiles=[], excludeFromLines=[]):
     pIface = PylintIface(logger)
     for myfile in fileList:
         #print myfile
+        #####
+        # Don't process files that are in the exclude list
+        if myfile in excludeFiles:
+            continue
         try:
             if not re.search(".+\.py$", myfile):
                 continue
@@ -58,6 +63,13 @@ def genTestData(fileList=[], excludeFiles=[], excludeFromLines=[]):
                 for item in jsonData:
                     if re.match("^error$", item['type']) or re.match("^fatal$", item['type']):
                         #print "Found: " + str(item['type']) + " (" + str(item['line']) + ") : " + str(item['message'])
+                        #####
+                        # Don't include json data that has a string from the
+                        # excludeLinesWith exclude list.
+                        # that contain a search string in excludeFromLines
+                        for searchItem in excludeFromLines:
+                            if re.search("%s"%searchItem, item['message']):
+                                continue
                         test_case_data.append((myfile, item['line'], item['message']))
         except AttributeError:
             pass
@@ -174,11 +186,11 @@ if __name__=="__main__":
         #####
         # Run unittest per options
         if opts.treeRoot:
-            test_case_data = test_case_data + genTestData(getRecursiveTree(opts.treeRoot))
+            test_case_data = test_case_data + genTestData(getRecursiveTree(opts.treeRoot), opts.excludeFiles, opts.excludeLinesWith)
         elif opts.dirToCheck:
-            test_case_data = test_case_data + genTestData(getDirList(opts.dirToCheck))
+            test_case_data = test_case_data + genTestData(getDirList(opts.dirToCheck), opts.excludeFiles, opts.excludeLinesWith)
         elif opts.doFiles:
-            test_case_data = test_case_data + genTestData(opts.doFiles)
+            test_case_data = test_case_data + genTestData(opts.doFiles, opts.excludeFiles, opts.excludeLinesWith)
 
     for specificError in test_case_data:
         #print str(specificError)
