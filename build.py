@@ -262,7 +262,7 @@ class SoftwareBuilder():
         except:
             self.APP = "stonix"
             self.APPICON = "stonix_icon"
-            self.APPVERSION = ""0.0.0""
+            self.APPVERSION = "0.0.0"
             self.WRAPPER = "stonix4mac"
             self.WRAPPERICON = "stonix_icon"
             self.WRAPPERVERSION = self.APPVERSION                
