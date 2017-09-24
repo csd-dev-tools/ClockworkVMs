@@ -11,7 +11,10 @@ from subprocess import Popen, PIPE
 from optparse import OptionParser
 from optparse import Option, OptionValueError
 
-sys.path.append("..")
+mydir = os.path.dirname(os.path.abspath(__file__))
+parentdir = "/" + "/".join(mydir.split("/")[:-1])
+print parentdir
+sys.path.append(parentdir)
 
 from lib.loggers import CyLogger
 from lib.loggers import LogPriority as lp
@@ -27,14 +30,14 @@ def getRecursiveTree(targetRootDir="."):
     filesList = []
     for root, dirs, files in os.walk(targetRootDir):
         for myfile in files:
-            if re.search(".+\.py$", myfile): 
+            if re.search(".+\.py$", myfile):
                 filesList.append(os.path.abspath(os.path.join(root, myfile)))
     return filesList
 
 def getDirList(targetDir="."):
     filesList = []
     for myfile in os.listdir(targetDir):
-        if re.search(".+\.py$", myfile): 
+        if re.search(".+\.py$", myfile):
             filesList.append(os.path.abspath(os.path.join(targetDir, myfile)))
     return filesList
 
@@ -210,27 +213,27 @@ if __name__=="__main__":
                 excludeFiles = confFileData['excludeFiles']
             except ValueError:
                 excludeFiles = []
-            
+
             try:
                 doFiles = confFileData['doFiles']
             except ValueError:
                 doFiles = []
-            
+
             try:
                 excludeLinesWith = confFileData['excludeLinesWith']
             except ValueError:
                 excludeLinesWith = []
-            
+
             try:
                 recursiveTree = confFileData['recursiveTree']
             except ValueError:
                 recursiveTree = ""
-            
+
             try:
                 dirToCheck = confFileData['dirToCheck']
             except ValueError:
                 dirToCheck = ""
-            
+
             try:
                 if re.match("^True$", confFileData['verbose']):
                     verbose = True
@@ -238,7 +241,7 @@ if __name__=="__main__":
                     verbose = False
             except ValueError:
                 verbose = False
-            
+
             try:
                 if re.match("^True$", confFileData['debug']):
                     debug = True
