@@ -261,7 +261,6 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
 
         return success, stdout, stderr, retcode
 
-        
     #----------------------------------------------------------------------
     # Subcommands
     #----------------------------------------------------------------------
@@ -451,10 +450,10 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
 
     #-------------------------------------------------------------------------
 
-    def changeKeychainPassword(self, user="",
-                                     oldPass=False,
-                                     newPass=False,
-                                     keychain=False):
+    def changeKeychainPassword(self, user,
+                                     oldPass,
+                                     newPass,
+                                     keychain):
         """
         Use the "security" command to set the login keychain.  If it has not
         been created, create the login keychain.
@@ -469,9 +468,12 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
         success = False
         stdout = ""
         user = user.strip()
-        oldPass = oldPass.strip()
-        newPass = newPass.strip()
-        keychain = keychain.strip()
+        if oldPass and isinstance(oldPass, basestring):
+            oldPass = oldPass.strip()
+        if newPass and isinstance(newPass, basestring):
+            newPass = newPass.strip()
+        if keychain and isinstance(keychain, basestring):
+            keychain = keychain.strip()
 
         #####
         # Input validation for the username, and check the passwords to make
@@ -649,19 +651,21 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
 
     #-------------------------------------------------------------------------
 
-    def authorize(self, ecode='', *args, **kwargs):
+    def authorize(self, options='', right='', *args, **kwargs):
         '''
         Display descrip6tive message for the given error code(s).
 
-        @param: Error code to acquire information about.
+        @param: options - Options to use for rights authorization.
+        @param: right - What right to authorize
 
         @author: Roy Nielsen
         '''
         success = False
         stdout = False
-        ecode = ecode.strip()
+        options = options.strip()
+        right = right.strip()
 
-        if not ecode or not isinstance(ecode, basestring):
+        if not options or not isinstance(options, basestring):
             return success, stdout
         else:
             #####
@@ -670,10 +674,8 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
             # so the quotes are required to fully resolve the file path.  
             # Note: this is done in the build of the command, rather than 
             # the build of the variable.
-            if keychain and isinstance(keychain, basestring):
-                cmd = { "find-identity" : ["-p", policy, "-s", sstring, "-v", keychain] }
-            else:
-                cmd = { "find-identity" : ["-p", policy, "-s", sstring, "-v"] }
+            if right and isinstance(right, basestring):
+                cmd = { "authorize" : [options, right] }
             self.logger.log(lp.DEBUG, "cmd: " + str(cmd))
             success, stdout, stderr, retcode = self.runSecurityCommand(cmd)
 
@@ -702,10 +704,7 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
             # so the quotes are required to fully resolve the file path.  
             # Note: this is done in the build of the command, rather than 
             # the build of the variable.
-            if keychain and isinstance(keychain, basestring):
-                cmd = { "find-identity" : ["-p", policy, "-s", sstring, "-v", keychain] }
-            else:
-                cmd = { "find-identity" : ["-p", policy, "-s", sstring, "-v"] }
+            cmd = { "error" : [ecode] }
             self.logger.log(lp.DEBUG, "cmd: " + str(cmd))
             success, stdout, stderr, retcode = self.runSecurityCommand(cmd)
 
@@ -757,7 +756,7 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
         '''
         success = False
         stdout = False
-        name = name.strip()
+        #name = name.strip()
         keychain = keychain.strip()
         if not options:
             options = []

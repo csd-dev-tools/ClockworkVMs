@@ -242,7 +242,7 @@ def removeFdeUser(myusername=""):
         success = True
     return success
 
-###########################################################################
+############################################################################
 
 def getecho (fileDescriptor):
     """This returns the terminal echo mode. This returns True if echo is

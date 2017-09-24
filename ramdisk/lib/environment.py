@@ -39,6 +39,8 @@ Created on Aug 24, 2010
 
 @author: dkennel
 @change: 2014/05/29 - ekkehard j. koch - pep8 and comment updates
+@change: 2017/03/07 - dkennel - added fisma risk level support
+@change: 2017.09/01 - rsn - taking out stonix specifics
 '''
 from __future__ import absolute_import
 #--- Native python libraries
@@ -52,8 +54,28 @@ import platform
 import pwd
 import time
 
-class Environment:
+try:
+    from localize import VERSION
+except:
+    VERSION = '0.0.1'
 
+# FISMACAT must be one of ['high', 'medium', 'low']
+try:
+    from localize import FISMACAT
+except:
+    FISMACAT = 'low'
+
+if os.geteuid() == 0:
+    try:
+        import dmidecode
+        DMI = True
+    except ImportError:
+        DMI = False
+else:
+    DMI = False
+
+
+class Environment(object):
     """
     The Environment class collects commonly used information about the
     execution platform and makes it available to the rules.
@@ -70,43 +92,27 @@ class Environment:
         self.macaddress = ''
         self.osversion = ''
         self.numrules = 0
+        self.version = VERSION
         self.euid = os.geteuid()
         currpwd = pwd.getpwuid(self.euid)
+        self.test_mode = ""
+        self.script_path = ""
+        self.resources_path = ""
+        self.rules_path = ""
+        self.log_path = ""
+        self.icon_path = ""
+        self.conf_path = ""
         try:
             self.homedir = currpwd[5]
-        except(IndexError):
+        except IndexError:
             self.homedir = '/dev/null'
         self.installmode = False
         self.verbosemode = False
         self.debugmode = False
         self.runtime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        self.systemfismacat = 'low'
+        self.determinefismacat()
         self.collectinfo()
-
-    def setinstallmode(self, installmode):
-        """
-        Set the install mode bool value. Should be true if the prog should run
-        in install mode.
-
-        @param bool: installmode
-        @return: void
-        @author: D. Kennel
-        """
-        try:
-            if type(installmode) is types.BooleanType:
-                self.installmode = installmode
-        except (NameError):
-            # installmode was undefined
-            pass
-
-    def getinstallmode(self):
-        """
-        Return the current value of the install mode bool. Should be true if
-        the program is to run in install mode.
-
-        @return: bool : installmode
-        @author: D. Kennel
-        """
-        return self.installmode
 
     def setverbosemode(self, verbosemode):
         """
@@ -118,9 +124,9 @@ class Environment:
         @author: D. Kennel
         """
         try:
-            if type(verbosemode) is types.BooleanType:
+            if isinstance(verbosemode, bool):
                 self.verbosemode = verbosemode
-        except (NameError):
+        except NameError:
             # verbosemode was undefined
             pass
 
@@ -144,9 +150,9 @@ class Environment:
         @author: D. Kennel
         """
         try:
-            if type(debugmode) is types.BooleanType:
+            if isinstance(bool, debugmode):
                 self.debugmode = debugmode
-        except (NameError):
+        except NameError:
             # debugmode was undefined
             pass
 
@@ -240,6 +246,15 @@ class Environment:
         """
         return self.homedir
 
+    def getversion(self):
+        """
+        Returns the version of the this program.
+
+        @return: string
+        @author: D. Kennel
+        """
+        return self.version
+
     def collectinfo(self):
         """
         Private method to populate data.
@@ -254,6 +269,7 @@ class Environment:
         # print 'Environment running guessnetwork'
         self.guessnetwork()
         self.collectpaths()
+        self.determinefismacat()
 
     def discoveros(self):
         """
@@ -373,14 +389,14 @@ class Environment:
             iplist = ipdata[2]
             try:
                 iplist.remove('127.0.0.1')
-            except (ValueError):
+            except ValueError:
                 # tried to remove loopback when it's not present, continue
                 pass
             if len(iplist) >= 1:
                 ipaddress = iplist[0]
             else:
                 ipaddress = '127.0.0.1'
-        except(socket.gaierror):
+        except socket.gaierror:
             # If we're here it's because socket.getfqdn did not in fact return
             # a valid hostname and gethostbyname errored.
             ipaddress = self.getdefaultip()
@@ -427,14 +443,14 @@ class Environment:
                                             stdout=subprocess.PIPE,
                                             close_fds=True)
                 routedata = routecmd.stdout.readlines()
-            except(OSError):
+            except OSError:
                 return ipaddr
             for line in routedata:
                 if re.search('^default', line):
                     line = line.split()
                     try:
                         gateway = line[1]
-                    except(IndexError):
+                    except IndexError:
                         return ipaddr
         else:
             try:
@@ -446,14 +462,14 @@ class Environment:
                                             stdout=subprocess.PIPE,
                                             close_fds=True)
                 routedata = routecmd.stdout.readlines()
-            except(OSError):
+            except OSError:
                 return ipaddr
             for line in routedata:
                 if re.search('gateway:', line):
                     line = line.split()
                     try:
                         gateway = line[1]
-                    except(IndexError):
+                    except IndexError:
                         return ipaddr
         if gateway:
             iplist = self.getallips()
@@ -508,7 +524,7 @@ class Environment:
                                          stdout=subprocess.PIPE,
                                          close_fds=True)
                 ifdata = ifcmd.stdout.readlines()
-            except(OSError):
+            except OSError:
                 return iplist
             for line in ifdata:
                 if re.search('inet addr:', line):
@@ -518,7 +534,7 @@ class Environment:
                         addr = addr.split(':')
                         addr = addr[1]
                         iplist.append(addr)
-                    except(IndexError):
+                    except IndexError:
                         continue
         else:
             try:
@@ -530,7 +546,7 @@ class Environment:
                                          stdout=subprocess.PIPE,
                                          close_fds=True)
                 ifdata = ifcmd.stdout.readlines()
-            except(OSError):
+            except OSError:
                 return iplist
             for line in ifdata:
                 if re.search('inet ', line):
@@ -538,40 +554,9 @@ class Environment:
                         line = line.split()
                         addr = line[1]
                         iplist.append(addr)
-                    except(IndexError):
+                    except IndexError:
                         continue
         return iplist
-
-    def get_property_number(self):
-        """
-        Find and return the
-        Property number of the local machine
-        @author: scmcleni
-        @author: D. Kennel
-        @return: int
-        """
-        propnum = 0
-        try:
-            if os.path.exists('/etc/property-number'):
-                propertynumberfile = open('/etc/property-number', 'r')
-                propnum = propertynumberfile.readline()
-                propnum = propnum.strip()
-                propertynumberfile.close()
-            if platform.system() == 'Darwin':
-                pnfetch = '/usr/sbin/nvram asset_id 2>/dev/null'
-                cmd = subprocess.Popen(pnfetch, shell=True,
-                                       stdout=subprocess.PIPE,
-                                       close_fds=True)
-                cmdout = cmd.stdout.readline()
-                cmdout = cmdout.split()
-                try:
-                    propnum = cmdout[1]
-                except(IndexError, KeyError):
-                    propnum = 0
-        except:
-            pass
-            # Failed to obtain property number
-        return propnum
 
     def get_system_serial_number(self):
         """
@@ -581,7 +566,18 @@ class Environment:
         @return: string
         """
         systemserial = '0'
-        if os.path.exists('/usr/sbin/system_profiler'):
+        if DMI and self.euid == 0:
+            try:
+                system = dmidecode.system()
+                for key in system:
+                    try:
+                        systemserial = system[key]['data']['Serial Number']
+                    except(IndexError, KeyError):
+                        continue
+            except(IndexError, KeyError):
+                # got unexpected data back from dmidecode
+                pass
+        elif os.path.exists('/usr/sbin/system_profiler'):
             profilerfetch = '/usr/sbin/system_profiler SPHardwareDataType'
             cmd3 = subprocess.Popen(profilerfetch, shell=True,
                                     stdout=subprocess.PIPE,
@@ -597,6 +593,66 @@ class Environment:
         systemserial = systemserial.strip()
         return systemserial
 
+    def get_chassis_serial_number(self):
+        """
+        Find and return the
+        Chassis serial number
+        @author: dkennel
+        @requires: string
+        """
+        chassisserial = '0'
+        if DMI and self.euid == 0:
+            try:
+                chassis = dmidecode.chassis()
+                for key in chassis:
+                    chassisserial = chassis[key]['data']['Serial Number']
+            except(IndexError, KeyError):
+                # got unexpected data back from dmidecode
+                pass
+        chassisserial = chassisserial.strip()
+        return chassisserial
+
+    def get_system_manufacturer(self):
+        """
+        Find and return the
+        System manufacturer
+        @author: D. Kennel
+        @return: string
+        """
+        systemmfr = 'Unk'
+        if DMI and self.euid == 0:
+            try:
+                system = dmidecode.system()
+                for key in system:
+                    try:
+                        systemmfr = system[key]['data']['Manufacturer']
+                    except(IndexError, KeyError):
+                        continue
+            except(IndexError, KeyError):
+                # got unexpected data back from dmidecode
+                pass
+        systemmfr = systemmfr.strip()
+        return systemmfr
+
+    def get_chassis_manfacturer(self):
+        """
+        Find and return the
+        Chassis manufacterer
+        @author: D. Kennel
+        @return: string
+        """
+        chassismfr = 'Unk'
+        if DMI and self.euid == 0:
+            try:
+                chassis = dmidecode.chassis()
+                for key in chassis:
+                    chassismfr = chassis[key]['data']['Manufacturer']
+            except(IndexError, KeyError):
+                # got unexpected data back from dmidecode
+                pass
+        chassismfr = chassismfr.strip()
+        return chassismfr
+
     def get_sys_uuid(self):
         """
         Find and return a unique identifier for the system. On most systems
@@ -607,7 +663,24 @@ class Environment:
         @return: string
         """
         uuid = '0'
-        if os.path.exists('/usr/sbin/smbios'):
+        if DMI and self.euid == 0:
+            try:
+                system = dmidecode.system()
+                for key in system:
+                    try:
+                        uuid = system[key]['data']['UUID']
+                    except(IndexError, KeyError):
+                        continue
+            except(IndexError, KeyError):
+                # got unexpected data back from dmidecode
+                pass
+        elif os.path.exists('/usr/sbin/dmidecode') and self.euid == 0:
+            uuidfetch = '/usr/sbin/dmidecode -s system-uuid'
+            cmd1 = subprocess.Popen(uuidfetch, shell=True,
+                                    stdout=subprocess.PIPE,
+                                    close_fds=True)
+            uuid = cmd1.stdout.readline()
+        elif os.path.exists('/usr/sbin/smbios'):
             smbiosfetch = '/usr/sbin/smbios -t SMB_TYPE_SYSTEM 2>/dev/null'
             cmd2 = subprocess.Popen(smbiosfetch, shell=True,
                                     stdout=subprocess.PIPE,
@@ -653,7 +726,17 @@ class Environment:
         ismobile = False
         dmitypes = ['LapTop', 'Portable', 'Notebook', 'Hand Held',
                     'Sub Notebook']
-        if os.path.exists('/usr/sbin/system_profiler'):
+        if DMI and self.euid == 0:
+            try:
+                chassis = dmidecode.chassis()
+                for key in chassis:
+                    chassistype = chassis[key]['data']['Type']
+                if chassistype in dmitypes:
+                    ismobile = True
+            except(IndexError, KeyError):
+                # got unexpected data back from dmidecode
+                pass
+        elif os.path.exists('/usr/sbin/system_profiler'):
             profilerfetch = '/usr/sbin/system_profiler SPHardwareDataType'
             cmd3 = subprocess.Popen(profilerfetch, shell=True,
                                     stdout=subprocess.PIPE,
@@ -700,10 +783,14 @@ class Environment:
 
         @author: Roy Nielsen
         """
-        script_path_zero = os.path.realpath(sys.argv[0])
+        try:
+            script_path_zero = sys._MEIPASS
+        except AttributeError:
+            script_path_zero = os.path.realpath(sys.argv[0])
+
         try:
             script_path_one = os.path.realpath(sys.argv[1])
-        except:
+        except IndexError:
             script_path_one = ""
 
         self.test_mode = False
@@ -720,7 +807,8 @@ class Environment:
             # the "stonix" binary blob created by pyinstaller, so don't include
             # here.
             #print "DEBUG: Environment.collectpaths: unexpected argv[0]: " + str(sys.argv[0])
-            if re.search("stonix.py$", script_path_one) or re.search("stonixtest.py$", script_path_one):
+            if re.search("stonix.py$", script_path_one) or \
+               re.search("stonixtest.py$", script_path_one):
                 script = script_path_one.split("/")[-1]
                 script_path = "/".join(script_path_one.split("/")[:-1])
 
@@ -734,7 +822,10 @@ class Environment:
                     print "ERROR: Cannot run using this method"
             else:
                 #print "DEBUG: Cannot find appropriate path, building paths for current directory"
-                self.script_path = os.getcwd()
+                try:
+                    self.script_path = sys._MEIPASS
+                except AttributeError:
+                    self.script_path = os.path.dirname(os.path.realpath(sys.argv[0]))
 
         #####
         # Set the rules & stonix_resources paths
@@ -793,6 +884,21 @@ class Environment:
             print self.conf_path
         else:
             self.conf_path = "/etc/stonix.conf"
+
+    def determinefismacat(self):
+        '''
+        This method pulls the fimsa categorization from the localize.py
+        localization file. This allows a site to prepare special packages for
+        use on higher risk systems rather than letting the system administrator
+        self select the higher level.
+
+        @return: string - low, med, high
+        @author: dkennel
+        '''
+        if FISMACAT not in ['high', 'med', 'low']:
+            raise ValueError('FISMACAT invalid: valid values are low, med, high')
+        else:
+            return FISMACAT
 
     def get_test_mode(self):
         """
@@ -862,11 +968,11 @@ class Environment:
         '''
         Set the number of rules that apply to the system. This information is
         used by the log dispatcher in the run metadata.
-        
+
         @param num: int - number of rules that apply to this host
         @author: dkennel
         '''
-        if type(num) is not int:
+        if isinstance(int, num):
             raise TypeError('Number of rules must be an integer')
         elif num < 0:
             raise ValueError('Number of rules must be a positive integer')
@@ -876,9 +982,35 @@ class Environment:
     def getnumrules(self):
         '''
         Return the number of rules that apply to this host.
-        
+
         @author: dkennel
         '''
         return self.numrules
 
-    
+    def getsystemfismacat(self):
+        '''
+        Return the system FISMA risk categorization.
+
+        @return: string - low, med, high
+        @author: dkennel
+        '''
+        return self.systemfismacat
+
+    def setsystemfismacat(self, category):
+        '''
+        Set the systems FISMA risk categorization. The risk categorization
+        cannot be set lower than the default risk level set in FISMACAT in
+        localize.py
+
+        @param category: string - low, med, high
+        @author: dkennel
+        '''
+
+        if category not in ['high', 'med', 'low']:
+            raise ValueError('SystemFismaCat invalid: valid values are low, med, high')
+        elif self.systemfismacat == 'high':
+            self.systemfismacat = 'high'
+        elif self.systemfismacat == 'med' and category == 'high':
+            self.systemfismacat = 'high'
+        elif self.systemfismacat == 'low' and category == 'high':
+            self.systemfismacat = category

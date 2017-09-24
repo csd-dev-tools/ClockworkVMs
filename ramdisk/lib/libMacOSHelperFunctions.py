@@ -9,6 +9,7 @@ import os
 import re
 import sys
 import platform
+import traceback
 
 #--- non-native python libraries in this source tree
 from .loggers import CyLogger
@@ -107,7 +108,8 @@ def get_darwin_mac() :
         #  net_hw_addr
     except Exception, err:
         logger.log(lp.VERBOSE, "Error attempting to acquire MAC address...")
-        logger.log(lp.VERBOSE, "Exception: " + str(err))
+        logger.log(lp.WARNING, traceback.format_exc())
+        logger.log(lp.WARNING, str(err))
         raise err
     else :
         net_hw_addr = "No MAC addr found"
@@ -237,3 +239,49 @@ def checkIfUserIsLocalAdmin(username="", message_level="normal") :
                     break
 
     return userFound
+
+###########################################################################
+
+def findLaunchJob(name=""):
+    """
+    Use the "launchctl list" to see if a launch job has been loaded and what
+    it's last status is.
+
+    @author: Roy Nielsen
+    """
+    success = False
+    lastStatus = 255
+    jobName = ""
+
+    if name:
+        cmd = ["/bin/launchctl", "list"]
+
+        logger.log(lp.VERBOSE, "About to run command: " + " ".join(cmd))
+
+        run.setCommand(cmd)
+        run.communicate()
+        retval, reterr, retcode = run.getNlogReturns()
+        #print retval
+        #print reterr
+        #print retcode
+ 
+        if retval:
+            for line in retval.split('\n'):
+                jobData = line.split()
+                try:
+                    lastStatus = jobData[1] 
+                    jobName = jobData[2]
+                    print str(jobName) + " -> " + str(lastStatus)
+                    if re.search("%s"%name, jobName) :
+                        print str(jobName) + " -> " + str(lastStatus)
+                        success = True
+                        break
+                except IndexError, ValueError:
+                    pass #print "... bad ..."
+                else:
+                    if success:
+                        print str(lastStatus) + " " + str(jobName)
+            if success:
+                print str(lastStatus) + " = " + str(jobName)
+    return success, jobName, lastStatus
+

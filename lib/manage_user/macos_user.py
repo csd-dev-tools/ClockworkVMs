@@ -608,6 +608,7 @@ class MacOSUser(ManageUserTemplate):
             if re.match("^hello world$", output.strip()):
                 authenticated = True
 
+        self.logger.log(lp.DEBUG, "authenticated: " + str(authenticated))
         return authenticated
 
     #----------------------------------------------------------------------

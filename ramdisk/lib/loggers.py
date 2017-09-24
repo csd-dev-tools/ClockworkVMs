@@ -19,8 +19,9 @@ import sys
 import time
 import socket
 import inspect
-import calendar
+#import calendar
 import datetime
+import traceback
 import logging
 import logging.handlers
 #from logging.handlers import RotatingFileHandler
@@ -36,6 +37,13 @@ def IllegalExtensionTypeError(Exception):
         Exception.__init__(self,*args,**kwargs)
 
 def IllegalLoggingLevelError(Exception):
+    """
+    Custom Exception
+    """
+    def __init__(self,*args,**kwargs):
+        Exception.__init__(self,*args,**kwargs)
+
+def EnvironmentError(Exception):
     """
     Custom Exception
     """
@@ -89,15 +97,20 @@ class CyLogger(object):
         """
         print ".............Level: " + str(level)
         self.lvl = int(level)
+        '''
         if environ:
             self.environment = environ
-            envDebugMode = self.environment.getdebugmode()
-            envVerboseMode = self.environment.getverbosemode()
+            try:
+                envDebugMode = self.environment.getdebugmode()
+                envVerboseMode = self.environment.getverbosemode()
+            except IndexError:
+                pass
             if re.match("^debug$", envDebugMode):
                 self.lvl = 10
             elif re.match("^verbose$", envVerboseMode):
                 self.lvl = 20
-        elif debug_mode or verbose_mode:
+        el'''
+        if debug_mode or verbose_mode:
             if debug_mode:
                 self.lvl = 10
             elif verbose_mode:
@@ -315,7 +328,7 @@ class CyLogger(object):
 
     #############################################
 
-    def log(self, priority=0, msg=""):
+    def log(self, priority, msg):
         """
         Interface to work similar to Stonix's LogDispatcher.py
 
@@ -328,6 +341,7 @@ class CyLogger(object):
             validatedLvl = int(pri)
         else:
             raise IllegalLoggingLevelError("Cannot log at this priority level: " + pri)
+        
         ####
         # Use the datetime library to get the time for a timestamp
         # using format YYYYi-MM-DD-HH-MM-SS
@@ -380,8 +394,16 @@ class CyLogger(object):
             shortFormat = '{} : {} ({}) '.format(str(prog),
                                                  str(function_name), 
                                                  str(line_number))
+        msg_list = []
+        if not isinstance(msg, list):
+            msg_list = msg.split("\n")
+        elif isinstance(msg, dict):
+            for key, value in msg.iteritems(msg):
+                msg_list.append(str(key) + " : " + str(value))
+        else:
+            msg_list = msg
 
-        for line in msg.split('\n'):
+        for line in msg_list:
             #####
             # Process via logging level
             if int(self.lvl) > 0 and int(self.lvl) < 10:
@@ -399,7 +421,11 @@ class CyLogger(object):
             elif int(self.lvl) >=30 and int(self.lvl) < 40:
                 #####
                 # Warning
-                self.logr.log(validatedLvl, longPrefix + "DEBUG: (" + pri + ") " + str(line))
+                try:
+                    self.logr.log(validatedLvl, longPrefix + "DEBUG: (" + str(pri) + ") " + str(line))
+                except Exception, err:
+                    self.logr.log(LogPriority.DEBUG, str(traceback.format_exc()))
+                    self.logr.log(LogPriority.DEBUG, str(err))
             elif int(self.lvl) >= 40 and int(self.lvl) < 50:
                 #####
                 # Error

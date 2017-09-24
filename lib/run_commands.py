@@ -436,6 +436,10 @@ class RunWith(object):
 
         @author: Roy Nielsen
         """
+        output = ""
+        error = ""
+        returncode = 0
+        pretcode = 0
         if re.match("^\s*$", user) or \
            re.match("^\s*$", password) or \
            not self.command :
@@ -446,7 +450,7 @@ class RunWith(object):
             return(255)
         else :
             output = ""
-            internal_command = ["/usr/bin/su", "-", str(user), "-c"]
+            internal_command = ["/usr/bin/su", "-", str(user.strip()), "-c"]
 
             if isinstance(self.command, list) :
                 internal_command.append(" ".join(self.command))
@@ -499,9 +503,10 @@ class RunWith(object):
                 self.returncode = None
             #print output.strip()
             output = output.strip()
+            self.logger.log(lp.DEBUG, "retcode: " + str(returncode))
             #log_message("Leaving runAs with: \"" + str(output) + "\"",
             #            "debug", message_level)
-            return output, self.error, self.returncode
+            return self.output, self.error, self.returncode
 
     ############################################################################
 
