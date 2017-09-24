@@ -10,9 +10,12 @@ import os
 import sys
 import time
 import ctypes
-import termios
+import traceback
 from subprocess import Popen, STDOUT, PIPE
-
+try:
+    import termios
+except:
+    pass
 #--- non-native python libraries in this source tree
 from .loggers import CyLogger
 from .loggers import LogPriority as lp

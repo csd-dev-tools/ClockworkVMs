@@ -850,7 +850,7 @@ class RunThread(threading.Thread) :
 
     @author: Roy Nielsen
     """
-    def __init__(self, command=[], logger=False, myshell=False) :
+    def __init__(self, command, logger, myshell=False) :
         """
         Initialization method
         """
@@ -933,7 +933,7 @@ class RunThread(threading.Thread) :
 
 ##############################################################################
 
-def runMyThreadCommand(cmd=[], logger=False, myshell=False) :
+def runMyThreadCommand(cmd, logger, myshell=False) :
     """
     Use the RunThread class to get the stdout and stderr of a command
 

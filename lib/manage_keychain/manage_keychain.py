@@ -12,6 +12,7 @@ Factory object for acquiring the right keychain manager
 from __future__ import absolute_import
 import sys
 import inspect
+import traceback
 
 from ..loggers import LogPriority as lp
 from ..loggers import CyLogger
@@ -79,8 +80,8 @@ class ManageKeychain(object):
             functionName = str(inspect.stack()[2][3])
             lineNumber = str(inspect.stack()[2][2])
         except Exception, err:
-            logger.log(lp.WARNING, traceback.format_exc())
-            logger.log(lp.WARNING, str(err))
+            self.logger.log(lp.WARNING, traceback.format_exc())
+            self.logger.log(lp.WARNING, str(err))
             raise err
         else:
             self.logger.log(lp.DEBUG, "called by: " + \
@@ -128,7 +129,7 @@ class ManageKeychain(object):
 
         #####
         # Call factory created object's mirror method
-        success, output = self.keychainMgr.listKeychain(*args, **kwargs)
+        success, output = self.keychainMgr.listKeychains(*args, **kwargs)
 
         #####
         # Postprocess logging

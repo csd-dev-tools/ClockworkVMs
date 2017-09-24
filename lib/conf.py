@@ -3,7 +3,7 @@ import re
 import os
 
 # local, program specific library
-from lib.loggers import LogPriority as lp
+from .loggers import LogPriority as lp
 
 
 class Conf(object) :
@@ -262,11 +262,3 @@ class Conf(object) :
         print "---==# #==---"
         print "script version:  " + str(self.version)
         print "---==# #==---"
-
-    def loggerSelf(self) :
-        """
-        log current Configuration via logger function
-        """
-        self.logger.log(lp.DEBUG, "---==# #==---")
-        self.logger.log(lp.DEBUG, "script version:  " + str(self.version))
-        self.logger.log(lp.DEBUG, "---==# #==---")
