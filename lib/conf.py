@@ -3,7 +3,8 @@ import re
 import os
 
 # local, program specific library
-from lib.loggers import LogPriority as lp
+from .loggers import CyLogger
+from .loggers import LogPriority as lp
 
 
 class Conf(object) :
@@ -17,7 +18,7 @@ class Conf(object) :
     def __init__(self) :
         self.version = "0.0.0.0"
         self.options = []
-        self.logger = False
+        self.logger = CyLogger()
         self.currentRepoPath = "~/"
         psudopath = os.path.abspath(os.path.dirname(__file__))
         partialpath = psudopath.split("/")

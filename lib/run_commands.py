@@ -23,7 +23,14 @@ from .loggers import CyLogger
 from .loggers import LogPriority as lp
 from .get_libc import getLibc
 
-def OSNotValidForRunWith(Exception):
+def OSNotValidForRunWith(BaseException):
+    """
+    Custom Exception
+    """
+    def __init__(self, *args, **kwargs):
+        Exception.__init__(self, *args, **kwargs)
+
+def NotACyLoggerError(BaseException):
     """
     Custom Exception
     """
@@ -57,8 +64,11 @@ class RunWith(object):
 
     @author: Roy Nielsen
     """
-    def __init__(self, logger=False):
-        self.logger = logger
+    def __init__(self, logger, dbmode=lp.INFO):
+        if isinstance(logger, CyLogger):
+            self.logger = logger
+        else:
+            raise NotACyLoggerError("Passed in value for logger is invalid, try again.")
         self.command = None
         self.output = None
         self.error = None
@@ -76,6 +86,7 @@ class RunWith(object):
 
         @author: Roy Nielsen
         """
+        success = False
         if command:
             self.command = command
         #####
@@ -425,6 +436,10 @@ class RunWith(object):
 
         @author: Roy Nielsen
         """
+        output = ""
+        error = ""
+        returncode = 0
+        pretcode = 0
         if re.match("^\s*$", user) or \
            re.match("^\s*$", password) or \
            not self.command :
@@ -435,7 +450,7 @@ class RunWith(object):
             return(255)
         else :
             output = ""
-            internal_command = ["/usr/bin/su", "-", str(user), "-c"]
+            internal_command = ["/usr/bin/su", "-", str(user.strip()), "-c"]
 
             if isinstance(self.command, list) :
                 internal_command.append(" ".join(self.command))
@@ -488,9 +503,10 @@ class RunWith(object):
                 self.returncode = None
             #print output.strip()
             output = output.strip()
+            self.logger.log(lp.DEBUG, "retcode: " + str(returncode))
             #log_message("Leaving runAs with: \"" + str(output) + "\"",
             #            "debug", message_level)
-            return output, self.error, self.returncode
+            return self.output, self.error, self.returncode
 
     ############################################################################
 
@@ -839,7 +855,7 @@ class RunThread(threading.Thread) :
 
     @author: Roy Nielsen
     """
-    def __init__(self, command=[], logger=False, myshell=False) :
+    def __init__(self, command, logger, myshell=False) :
         """
         Initialization method
         """
@@ -849,18 +865,18 @@ class RunThread(threading.Thread) :
         self.reterr = None
         self.shell = myshell
         threading.Thread.__init__(self)
-        """
+
         if isinstance(self.command, types.ListType) :
             self.shell = True
             self.printcmd = " ".join(self.command)
         if isinstance(self.command, types.StringTypes) :
             self.shell = False
             self.printcmd = self.command
-        """
-        if not isinstance(logger, (bool, CyLogger)):
-            self.logger = CyLogger()
-        else:
+
+        if isinstance(logger, CyLogger):
             self.logger = logger
+        else:
+            raise NotACyLoggerError("Passed in value for logger is invalid, try again.")
 
         self.logger.log(lp.INFO, "Initialized runThread...")
 
@@ -881,6 +897,22 @@ class RunThread(threading.Thread) :
                 self.logger.log(lp.WARNING, traceback.format_exc())
                 self.logger.log(lp.WARNING, str(err))
                 raise err
+            else :
+                try:
+                    self.retout, self.reterr = p.communicate()
+                except Exception, err :
+                    self.logger.log(lp.WARNING, "Exception trying to open: " + \
+                               str(self.printcmd))
+                    self.logger.log(lp.WARNING, "Associated exception: " + str(err))
+                    raise err
+                else :
+                    #logMessage("Return values: ", "debug", self.message_level)
+                    #logMessage("retout: " + str(self.retout),
+                    #           "debug", self.message_level)
+                    #logMessage("reterr: " + str(self.reterr),
+                    #           "debug", self.message_level)
+                    self.logger.log(lp.WARNING, "Finished \"run\" of: " + \
+                                str(self.printcmd))
 
     ##########################################################################
 
@@ -906,7 +938,7 @@ class RunThread(threading.Thread) :
 
 ##############################################################################
 
-def runMyThreadCommand(cmd=[], logger=False, myshell=False) :
+def runMyThreadCommand(cmd, logger, myshell=False) :
     """
     Use the RunThread class to get the stdout and stderr of a command
 
@@ -914,6 +946,8 @@ def runMyThreadCommand(cmd=[], logger=False, myshell=False) :
     """
     retval = None
     reterr = None
+    if not isinstance(logger, CyLogger):
+        raise NotACyLoggerError("Passed in value for logger is invalid, try again.")
     print str(cmd)
     print str(logger)
     if cmd and logger :

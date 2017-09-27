@@ -80,6 +80,7 @@ class VirtualMachineSettings(QtWidgets.QDialog):
         self.jsonData = {}
         self.vmTypes = []
         self.doVagrantBox = False
+        self.vmSelected = False
 
         ####################
         ### TEMPORARY until functionality is supported
@@ -88,14 +89,19 @@ class VirtualMachineSettings(QtWidgets.QDialog):
         ####################
 
         #####
+        # Attempt to reset button roles
+        self.ui.openJsonBtn = QtWidgets.QPushButton("Open Json")
+        self.ui.openJsonBtn.clicked.connect(self.loadPreviousFile) 
+        self.ui.buttonBox.addButton(self.ui.openJsonBtn, QtWidgets.QDialogButtonBox.ActionRole)
+
+
+        #####
         # Handle button box
         #self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.reject) 
 
         self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).clicked.connect(self.processVm) 
 
         self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Save).clicked.connect(self.saveForLater) 
-
-        self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Open).clicked.connect(self.loadPreviousFile) 
 
         self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Reset).clicked.connect(self.resetToDefault) 
 
@@ -444,7 +450,9 @@ class VirtualMachineSettings(QtWidgets.QDialog):
 
         if not vmtypes:
             QtWidgets.QMessageBox.critical(self, "Error", "...Need a virtual machine to be selected...", QtWidgets.QMessageBox.Ok)
+            self.vmSelected = False
         else:
+            self.vmSelected = True
             if self.ui.chkVagrant.isChecked():
                 includeVagrant = True
 
@@ -606,13 +614,14 @@ class VirtualMachineSettings(QtWidgets.QDialog):
         elif not vmware and not vbox and parallels:
             only = 'parallels-iso'
 
-        #####
-        # Run packer
-        pr = PackerRunner(self.conf)
-        if only or self.only:
-            pr.runPackerBoxcutter(tmpTemplateFile, vmImage=only)
-        else:
-            pr.runPackerBoxcutter(tmpTemplateFile)
+        if self.vmSelected:
+            #####
+            # Run packer
+            pr = PackerRunner(self.conf)
+            if only or self.only:
+                pr.runPackerBoxcutter(tmpTemplateFile, vmImage=only)
+            else:
+                pr.runPackerBoxcutter(tmpTemplateFile)
 
     def saveForLater(self):
         '''
@@ -624,15 +633,23 @@ class VirtualMachineSettings(QtWidgets.QDialog):
         # Save varFile
         filename, _ = QtWidgets.QFileDialog.getSaveFileName(self, 'Save File', '.')
         self.getVarsFromIface()
-        self.saveTemporaryTemplateFile(filename) # saveVarsToJsonFile(filename)
+        self.saveTemporaryTemplateFile(filename)
+        templateFile = self.conf.getCurrentTemplateFilePath()
+        dotFile = "." + filename.split("/")[-1] + "_templateFile"
+        dirPath = os.path.dirname(filename)
+        shutil.copy(templateFile, dirPath + "/" + dotFile)
 
     def loadPreviousFile(self):
         '''
         Load previous file (from template directory)
         '''
         filename, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open File', '.')
-        self.loadGuiFromPjh(filename)
-        #self.loadValuesToUI(filename)
+        pjh = PackerJsonHandler(self.logger)
+        jsonFile = pjh.readExistingJsonTemplateFile(filename)
+        self.loadGuiFromPjh(pjh)
+        dotFile = "." + filename.split("/")[-1] + "_templateFile"
+        dirPath = os.path.dirname(filename)
+        self.conf.setCurrentTemplateFilePath(dirPath + "/" + dotFile)
 
     def resetToDefault(self):
         '''

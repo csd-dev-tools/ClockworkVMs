@@ -15,12 +15,13 @@ import pwd
 import sys
 import time
 import shutil
+import traceback
 from subprocess import Popen
 
 ########## 
 # local app libraries
-from .parent_manage_user import ParentManageUser
-from .parent_manage_user import BadUserInfoError
+from ..manage_user.manage_user_template import ManageUserTemplate
+from ..manage_user.manage_user_template import BadUserInfoError
 from ..run_commands import RunWith
 from ..loggers import CyLogger
 from ..loggers import LogPriority as lp
@@ -49,7 +50,7 @@ class CreateHomeDirError(Exception):
         Exception.__init__(self, *args, **kwargs)
 
 
-class MacOSUser(ParentManageUser):
+class MacOSUser(ManageUserTemplate):
     """
     Class to manage users on Mac OS.
 
@@ -104,7 +105,7 @@ class MacOSUser(ParentManageUser):
         self.module_version = '20160225.125554.540679'
 
         self.dscl = "/usr/bin/dscl"
-        self.runWith = RunWith(self.logger)
+        self.runner = RunWith(self.logger)
 
         self.users = self.getUsers()
 
@@ -206,6 +207,60 @@ class MacOSUser(ParentManageUser):
 
         return userInfo
 
+    #----------------------------------------------------------------------
+
+    def getUserProperties(self, userName=""):
+        """
+        """
+        success = False
+        properties = 0
+        return success, properties
+    '''
+        properties = {}
+        userInfo = False
+        if self.isSaneUserName(userName):
+            success, output , error, returncode = self.runDsclCommand({"read" : [".", "/Users/" + str(userName)]})
+            if not error:
+                jpegPhotoFound = False
+                propertyAttribute = False
+                propertyName = False
+                print output
+                for line in output.split("\n"):
+                    if re.search(':', line):
+                        jpegPhotoFound = False
+                        if propertyName and propertyAttribute:
+                            #####
+                            # Found a new attribute, put the previous information
+                            # into the dictionary
+                            properties[propertyName] = propertyAttribute
+                        
+                        prop = line.split(':')
+                        propertyName = prop[0].strip()
+                        if re.search("JPEGPhoto", propertyName):
+                            jpegPhotoFound = True
+                            continue
+                        try:
+                            propertyAttribute = property[1].strip()
+                        except:
+                            pass
+                    else:
+                        if line and not jpegPhotoFound:
+                            if not propertyAttribute:
+                                propertyAttribute = line
+                            else:
+                                propertyAttribute = propertyAttribute + ", " + line
+        return success, {userName : properties }
+            try:
+                userInfo = output.split()[1]
+            except (KeyError, IndexError), err:
+                self.logger.log(lp.INFO, "Error attempting to find user" + \
+                                         str(userName) + " in the " + \
+                                         "directory service.")
+        else:
+            raise BadUserInfoError("Need a valid user name...")
+
+        return userInfo
+        '''
     #----------------------------------------------------------------------
 
     def getUserShell(self, userName=""):
@@ -321,9 +376,9 @@ class MacOSUser(ParentManageUser):
         success = False
         if self.isSaneUserName(user):
             cmd = [self.dscl, ".", "-read", "/Users/" + str(user)]
-            self.runWith.setCommand(cmd)
-            self.runWith.communicate()
-            retval, reterr, retcode = self.runWith.getNlogReturns()
+            self.runner.setCommand(cmd)
+            self.runner.communicate()
+            retval, reterr, retcode = self.runner.getNlogReturns()
 
             if not reterr:
                 success = True
@@ -453,9 +508,9 @@ class MacOSUser(ParentManageUser):
         userInfo = False
         
         if self.isSaneUserName(userName):
-            self.runWith.setCommand(["/usr/bin/pwpolicy", "-u", str(userName),
+            self.runner.setCommand(["/usr/bin/pwpolicy", "-u", str(userName),
                                      "-authentication-allowed"])
-            output, error, retcode = self.runWith.communicate()
+            output, error, retcode = self.runner.communicate()
             
             self.logger.log(lp.DEBUG, "Output: " + str(output.strip()))
             
@@ -534,6 +589,8 @@ class MacOSUser(ParentManageUser):
         @author: Roy Nielsen
         """
         authenticated = False
+        output = ""
+        error = ""
 
         if not self.isSaneUserName(user) or \
            re.match("^\s+$", password) or not password:
@@ -542,7 +599,7 @@ class MacOSUser(ParentManageUser):
             self.logger.log(lp.INFO, "check password...")
         else:
             
-            self.runWith.setCommand(['/bin/echo', 'hello world'])
+            self.runner.setCommand(['/bin/echo', 'hello world'])
             
             output, error, retcode = self.runWith.runAs(user, password)
             
@@ -551,6 +608,7 @@ class MacOSUser(ParentManageUser):
             if re.match("^hello world$", output.strip()):
                 authenticated = True
 
+        self.logger.log(lp.DEBUG, "authenticated: " + str(authenticated))
         return authenticated
 
     #----------------------------------------------------------------------
@@ -599,9 +657,9 @@ class MacOSUser(ParentManageUser):
         if isinstance(userName, basestring)\
            and re.match("^[A-Za-z][A-Za-z0-9]*$", userName):
             cmd = [self.dscl, ".", "-create", "/Users/" + str(userName)]
-            self.runWith.setCommand(cmd)
-            self.runWith.communicate()
-            retval, reterr, retcode = self.runWith.getNlogReturns()
+            self.runner.setCommand(cmd)
+            self.runner.communicate()
+            retval, reterr, retcode = self.runner.getNlogReturns()
 
             if not reterr:
                 success = True
@@ -723,10 +781,10 @@ class MacOSUser(ParentManageUser):
         success = False
         reterr = ""
         if user:
-            cmd = ["/usr/sbin/createhomedir", "-c", " -u", + str(user)]
-            self.runWith.setCommand(cmd)
-            self.runWith.communicate()
-            retval, reterr, retcode = self.runWith.getNlogReturns()
+            cmd = ["/usr/sbin/createhomedir", "-c", " -u", str(user)]
+            self.runner.setCommand(cmd)
+            self.runner.communicate()
+            retval, reterr, retcode = self.runner.getNlogReturns()
 
             if not reterr:
                 success = True
@@ -839,9 +897,9 @@ class MacOSUser(ParentManageUser):
 
         if self.isSaneUserName(user):
             cmd = [self.dscl, ".", "-delete", "/Users/" + str(user)]
-            self.runWith.setCommand(cmd)
-            self.runWith.communicate()
-            retval, reterr, retcode = self.runWith.getNlogReturns()
+            self.runner.setCommand(cmd)
+            self.runner.communicate()
+            retval, reterr, retcode = self.runner.getNlogReturns()
 
             if not reterr:
                 success = True
@@ -902,7 +960,157 @@ class MacOSUser(ParentManageUser):
     # Mac OS Specific Methods
     #----------------------------------------------------------------------
 
-    def setDscl(self, directory=".", action="", object="", property="", value=""):
+    def validateDsclCommand(self, command={}):
+        """
+        Validate that we have a properly formatted command, and the subcommand
+        is valid.
+        
+        @param: the commandDict should be in the format below:
+        
+        cmd = { "set-keychain-password" : [oldPass, newPass, "'" + keychain + "'"] }
+        
+        where the key is the security 'subcommand' and the list is an ordered
+        list of the arguments to give the subcommand.
+        
+        @returns: success - whether the command was successfull or not.
+        
+        @author: Roy Nielsen
+        """
+        success = False
+        subcmd = []
+        if not isinstance(command, dict):
+            self.logger.log(lp.ERROR, "Command must be a dictionary...")
+        else:
+            #self.logger.log(lp.DEBUG, "cmd: " + str(command))
+            commands = 0
+            for subCommand, args in command.iteritems():
+                commands += 1
+                #####
+                # Check to make sure only one command is in the dictionary
+                if commands > 1:
+                    self.logger.log(lp.ERROR, "Damn it Jim! One command at a time!!")
+                    success = False
+                    break
+                #####
+                # Check if the subcommand is a valid subcommand...
+                validSubcommands = ["read",
+                                    "passwd",
+                                    "list",
+                                    "readall",
+                                    "readpl",
+                                    "search",
+                                    "create",
+                                    "delete",
+                                    "change",
+                                    "append",
+                                    "diff"]
+                if subCommand not in validSubcommands:
+                    success = False
+                    self.logger.log(lp.DEBUG, "subCommand: " + str(subCommand))
+                    break
+                #####
+                # Check to make sure the key or subCommand is a string, and the value is
+                # alist and args are
+                if not isinstance(subCommand, basestring) or not isinstance(args, list):
+                    self.logger.log(lp.ERROR, "subcommand needs to be a string, and args needs to be a list of strings")
+                    success = False
+                else:
+                    #####
+                    # Check the arguments to make sure they are all strings
+                    success = True
+                    for arg in args:
+                        if not isinstance(arg, basestring):
+                            self.logger.log(lp.ERROR, "Arg '" + str(arg) + "'needs to be a string...")
+                            success = False
+                            break
+                    if success:
+                        datasource = args[0]
+                        command = subCommand
+                        args = args[1:]
+                        subcmd = [datasource] + ["-" + command] + args
+        return success, subcmd
+
+    #-------------------------------------------------------------------------
+
+    def runDsclCommand(self, commandDict={}):
+        """
+        Use the passed in dictionary to create a MacOS 'security' command
+        and execute it.
+        
+        @param: the commandDict should be in the format below:
+        
+        cmd = { command : [datasource, arg1, arg2, arg3] }
+        
+        where the command is the dscl 'subcommand' and the list is an ordered
+        list.  The first item in the list is the datasource, or directory to
+        search for the information.  The rest are an ordered list of the 
+        arguments to give the subcommand.  The structured command below:
+        
+        cmd = { "read" : ['.', '/users/<user>', 'PrimaryGroupID'] }
+
+        will yield a dscl command that looks like:
+
+        dscl '.' read /Users/<user> 'PrimaryGroupID'
+        
+        @returns: success - whether the command was successfull or not.
+                  output  - output of the resulting command.  Definitely
+                                useful for getters, not necessarily for setters.
+                  error   - stderr output
+                  returncode - return code that the command returns
+        
+        @author: Roy Nielsen
+        """
+        success = False
+        output = ""
+        error = ""
+        returncode = ""
+        uid = os.getuid()
+        #####
+        # Make sure the command dictionary was properly formed, as well as
+        # returning the formatted subcommand list
+        validationSuccess, subCmd = self.validateDsclCommand(commandDict)
+        #self.logger.log(lp.DEBUG, "validationSuccess: " + str(validationSuccess))
+        #self.logger.log(lp.DEBUG, "subCmd: " + str(subCmd))
+        if validationSuccess:
+            #self.logger.log(lp.DEBUG, "cmdDict: " + str(commandDict))
+            #####
+            # Command setup - note that the keychain deliberately has quotes
+            # around it - there could be spaces in the path to the keychain,
+            # so the quotes are required to fully resolve the file path.  
+            # Note: this is done in the build of the command, rather than 
+            # the build of the variable.
+            cmd = [self.dscl] + subCmd
+            #####
+            # set up the command
+            self.runWith.setCommand(cmd)
+            
+            if re.match("^0$", str(uid)):
+                #####
+                # If the running process is running as an admin, lower to the
+                # user context to run dscl as the user.  The user proerty
+                # should be set with the setUser method. Lift = elevator...
+                output, error, retcode = self.runWith.liftDown(self.userName)
+                self.logger.log(lp.ERROR, "Took the lift down...")
+                if not str(error).strip():
+                    success = True
+            else:
+                #####
+                # Run the command
+                output, error, retcode = self.runWith.communicate()
+                self.logger.log(lp.INFO, "DSCL cmd ran in current context..")
+
+                if not str(error).strip():
+                    success = True
+
+            #self.logger.log(lp.DEBUG, "Output: " + str(output))
+            #self.logger.log(lp.DEBUG, "Error: " + str(error))
+            #self.logger.log(lp.DEBUG, "Return code: " + str(returncode))
+
+        return success, output, error, returncode
+
+    #----------------------------------------------------------------------
+
+    def setDscl(self, directory=".", action="", dirObject="", dirProperty="", value=""):
         """
         Using dscl to set a value in a directory...
 
@@ -912,15 +1120,15 @@ class MacOSUser(ParentManageUser):
         reterr = ""
         retval = ""
         #####
-        # If elevated, use the liftDown runWith method to run the command as
+        # If elevated, use the liftDown runner method to run the command as
         # a regular user.
         if directory and action and object and property:
             if directory and action and object and property and value:
-                cmd = [self.dscl, directory, action, object, property, value]
+                cmd = [self.dscl, directory, action, dirObject, dirProperty, value]
             else:
-                cmd = [self.dscl, directory, action, object, property]
+                cmd = [self.dscl, directory, action, dirObject, dirProperty]
 
-            self.runWith.setCommand(cmd)
+            self.runner.setCommand(cmd)
             if re.match("^%0$", str(os.getuid()).strip()):
                 passfound = False
                 for arg in cmd:
@@ -933,20 +1141,20 @@ class MacOSUser(ParentManageUser):
 
                 #####
                 # Run the command, lift down...
-                self.runWith.liftDown(self.userName)
+                self.runner.liftDown(self.userName)
                 self.logger.log(lp.INFO, "Took the lift down...")
-                retval, reterr, retcode = self.runWith.getNlogReturns()
+                retval, reterr, retcode = self.runner.getNlogReturns()
                 if not reterr:
                     success = True
             else:
                 #####
                 # Run the command
-                retval, reterr, retcode = self.runWith.communicate()
+                retval, reterr, retcode = self.runner.communicate()
 
                 if not reterr:
                     success = True
 
-            retval, reterr, retcode = self.runWith.getNlogReturns()
+            retval, reterr, retcode = self.runner.getNlogReturns()
 
         return success
 
@@ -989,9 +1197,9 @@ class MacOSUser(ParentManageUser):
             else:
                 cmd = [self.dscl, directory, action, dirobj, dirprop]
 
-            self.runWith.setCommand(cmd)
-            self.runWith.communicate()
-            retval, reterr, retcode = self.runWith.getNlogReturns()
+            self.runner.setCommand(cmd)
+            self.runner.communicate()
+            retval, reterr, retcode = self.runner.getNlogReturns()
 
             if not reterr:
                 success = True

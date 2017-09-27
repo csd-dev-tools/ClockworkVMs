@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 ###############################################################################
 #                                                                             #
 # Copyright 2015.  Los Alamos National Security, LLC. This material was       #
@@ -28,11 +28,15 @@ Created on Aug 24, 2010
 @change: eball 2016/07/12 Original implementation
 @change: rsn 2017/03/20 Adding methods for validation, fisma check and setting
                         internal os variables per the environment.
+@change: rsn 2017/09/01 Port from stonix
 '''
-
+from __future__ import absolute_import
+#--- Native python libraries
 import re
+import traceback
 from distutils.version import LooseVersion
-from loggers import LogPriority
+#--- non-native python libraries in this source tree
+from .loggers import LogPriority
 
 
 class CheckApplicable(object):
@@ -300,14 +304,14 @@ class CheckApplicable(object):
             clevel = checkLevel
         else:
             try:
-                clevel = self.applicable['fisma']
+                clevel = self.getSystemFismaLevel()
             except KeyError:
                 self.logger.log(LogPriority.DEBUG, traceback.format_exc())
                 self.logger.log(LogPriority.DEBUG, "Can't acquire a valid checkLevel...")
                 raise ValueError('checkLevel invalid: valid values are low, med, high')
 
         if systemLevel is not None and systemLevel in ['high', 'med', 'low']:
-             slevel = systemLevel
+            slevel = systemLevel
         else:
             try:
                 slevel = self.environ.getsystemfismacat()

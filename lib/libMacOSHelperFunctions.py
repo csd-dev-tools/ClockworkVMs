@@ -9,6 +9,7 @@ import os
 import re
 import sys
 import platform
+import traceback
 
 #--- non-native python libraries in this source tree
 from .loggers import CyLogger

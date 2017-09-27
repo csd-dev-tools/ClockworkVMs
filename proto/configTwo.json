@@ -1,0 +1,22 @@
+{
+    "excludeFiles":[
+        "fileOne.py",
+        "fileTwo.py",
+        "fileThree.py"
+        ],
+    "doFiles":[
+        "fileFour.py",
+        "fileFive.py",
+        "fileSix.py"
+        ],
+    "excludeLinesWith":[
+        "PyQt",
+        "QtGui",
+        "QtCore",
+        "QtWidgets"
+        ],
+    "recursiveTree":"..",
+    "dirToCheck":".",
+    "verbose":"True",
+    "debug":"False"
+}

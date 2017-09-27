@@ -46,7 +46,7 @@ class ProgramOptions(object) :
     def __init__(self):
         """
         Initialization routine for our program options
-        
+
         Acquiring command line arguments with OptionParser
         """
         self.version = ""
@@ -65,7 +65,7 @@ class ProgramOptions(object) :
         """
         #####
         # Collect the passed in parameters, or define them as default.
-        
+
         parser = OptionParser(usage="  %prog [options]\n\n"  + \
              "Only options are to change the logging level of the application.", \
              version="%prog 0.7.0.25")
@@ -82,42 +82,42 @@ class ProgramOptions(object) :
                           default=False, help="Print debug messages")
 
         #####
-        # Where to put the logs.        
+        # Where to put the logs.
         parser.add_option("-l", "--log-path", action="store", dest="logPath", \
                           default="/tmp/", help="Path to put the logs")
 
         #####
-        # Where to put the logs.        
+        # Where to put the logs.
         parser.add_option("-p", "--proxy", action="store", dest="proxy", \
                           default="", help="Sets HTTP_PROXY, HTTPS_PROXY and FTP_PROXY to the value passed in.")
 
         #####
-        # Where to put the logs.        
+        # Where to put the logs.
         parser.add_option("--http-proxy", action="store", dest="httpProxy", \
                           default="", help="Sets the http_proxy.")
 
         #####
-        # Where to put the logs.        
+        # Where to put the logs.
         parser.add_option("--https-proxy", action="store", dest="httpsProxy", \
                           default="", help="Sets the https_proxy.")
 
         #####
-        # Where to put the logs.        
+        # Where to put the logs.
         parser.add_option("--ftp-proxy", action="store", dest="ftpProxy", \
                           default="", help="Sets the ftp_proxy.")
 
         #####
-        # Where to put the logs.        
+        # Where to put the logs.
         parser.add_option("--rsync-proxy", action="store", dest="rsyncProxy", \
                           default="", help="Sets the rsync_proxy.")
 
         #####
-        # Where to put the logs.        
+        # Where to put the logs.
         parser.add_option("--no-proxy", action="store", dest="noProxy", \
                           default="", help="Sets the no_proxy.")
 
         #####
-        # Where to put the logs.        
+        # Where to put the logs.
         parser.add_option("--repo-root", action="store", dest="repoRoot", \
                           default="/opt/tools/src/boxcutter", help="Path to put the logs")
 
@@ -163,7 +163,7 @@ class ProgramOptions(object) :
             self.conf.setHttpsProxy(self.getProxy())
             self.conf.setFtpProxy(self.getProxy())
             self.conf.setProxy(self.getProxy())
-        
+
         self.conf.setRepoRoot(self.getRepoRoot())
 
     def getDebugMode(self):

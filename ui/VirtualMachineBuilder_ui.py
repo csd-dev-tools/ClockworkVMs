@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/VirtualMachineBuilder.ui'
 #
-# Created by: PyQt5 UI code generator 5.7
+# Created by: PyQt5 UI code generator 5.8.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -50,9 +50,6 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-        
-        MainWindow.show()
-        MainWindow.raise_()
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate

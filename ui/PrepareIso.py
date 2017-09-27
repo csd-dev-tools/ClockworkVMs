@@ -112,11 +112,16 @@ class PrepareIso(QtWidgets.QDialog):
         os.chdir(self.conf.getRepoRoot() + "/macos")
         print os.getcwd()
 
-        subcmd = """./prepare_iso/prepare_iso.sh %s dmg"""%(self.installerApp)
+        scriptPath = self.conf.getRepoRoot() + "/macos/prepare_iso/prepare_iso.sh"
+
+        installerApp = re.sub(r"\\", r"", self.installerApp)
+        
+        dmgPath = "/Contents/SharedSupport/InstallESD.dmg"
+        subcmd = "%s %s%s dmg"%(scriptPath, self.installerApp, dmgPath)
         
         self.logger.log(lp.DEBUG, "Subcmd: " + str(subcmd))
         
-        #subcmd = re.sub(r"\\\\", r"\\", subcmd)
+        #subcmd = re.sub(r"\\", r"", subcmd)
 
         #self.logger.log(lp.DEBUG, "Subcmd: " + str(subcmd))
         
@@ -128,7 +133,7 @@ class PrepareIso(QtWidgets.QDialog):
 
         self.logger.log(lp.DEBUG, "out: " + str(output))
         self.logger.log(lp.DEBUG, "err: " + str(error))
-        self.logger.log(lp.DEBUG, "retcode: " + str(retcode))
+        self.logger.log(lp.DEBUG, "retcode: " + str(ord(retcode)))
 
         dmgName = ""
         #####
