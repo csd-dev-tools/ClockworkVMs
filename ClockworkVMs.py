@@ -57,8 +57,9 @@ def main():
     mydialog.setOpenExternalLinks(True)
     #mydialog.setModal(True)
     mydialog.setWindowTitle("Virtual Machine Builder")
-    #mydialogRetval = mydialog.exec_()
-    mydialog.raise_()
+    if mydialog.exec_():
+        #mydialog.show()
+        mydialog.raise_()
     '''
     if mydialogRetval == mydialog.Accepted:
         logger.log(lp.DEBUG, "Dialog accepted...")

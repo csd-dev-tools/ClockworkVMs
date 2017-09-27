@@ -83,7 +83,7 @@ if __name__ == "__main__":
     try:
         newJson['_comment'] = data["_comment"]
     except KeyError, err:
-        print traceback.exc()
+        print traceback.format_exc()
         newJson['_command'] = data['_command']
 
     newJson['variables'] = data['variables']

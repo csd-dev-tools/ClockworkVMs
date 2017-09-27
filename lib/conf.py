@@ -3,6 +3,7 @@ import re
 import os
 
 # local, program specific library
+from .loggers import CyLogger
 from .loggers import LogPriority as lp
 
 
@@ -17,7 +18,7 @@ class Conf(object) :
     def __init__(self) :
         self.version = "0.0.0.0"
         self.options = []
-        self.logger = False
+        self.logger = CyLogger()
         self.currentRepoPath = "~/"
         psudopath = os.path.abspath(os.path.dirname(__file__))
         partialpath = psudopath.split("/")
@@ -262,3 +263,11 @@ class Conf(object) :
         print "---==# #==---"
         print "script version:  " + str(self.version)
         print "---==# #==---"
+
+    def loggerSelf(self) :
+        """
+        log current Configuration via logger function
+        """
+        self.logger.log(lp.DEBUG, "---==# #==---")
+        self.logger.log(lp.DEBUG, "script version:  " + str(self.version))
+        self.logger.log(lp.DEBUG, "---==# #==---")

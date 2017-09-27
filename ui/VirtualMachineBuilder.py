@@ -121,6 +121,8 @@ class VirtualMachineBuilder(QtWidgets.QMainWindow):
         
         self.refreshFamilyComboBox()
         self.osFamilySelected(0)
+
+        self.logger.log(lp.DEBUG, "Done with VirtualMachineBuilder init...")
         
     def setOpenExternalLinks(self, set_state=True):
         """
