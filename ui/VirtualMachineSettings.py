@@ -117,6 +117,7 @@ class VirtualMachineSettings(QtWidgets.QDialog):
         # Acquire current json varfile data and print it.
         self.varFilePath = self.conf.getCurrentVarFilePath()
         self.templateFilePath = ""
+        self.workingDir = os.path.abspath(os.path.dirname(self.varFilePath))
 
         self.loadValuesToUI(self.varFilePath)
         self.selectGeneral()
@@ -615,6 +616,8 @@ class VirtualMachineSettings(QtWidgets.QDialog):
             only = 'parallels-iso'
 
         if self.vmSelected:
+            oldWorkingDir = os.getcwd()
+            newWorkingDir = os.chdir(self.workingDir)
             #####
             # Run packer
             pr = PackerRunner(self.conf)
@@ -622,6 +625,7 @@ class VirtualMachineSettings(QtWidgets.QDialog):
                 pr.runPackerBoxcutter(tmpTemplateFile, vmImage=only)
             else:
                 pr.runPackerBoxcutter(tmpTemplateFile)
+            os.chdir(oldWorkingDir)
 
     def saveForLater(self):
         '''
