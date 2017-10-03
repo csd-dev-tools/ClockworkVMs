@@ -486,9 +486,9 @@ class VirtualMachineSettings(QtWidgets.QDialog):
                 try:
                     newJson['_comment'] = data["_comment"]
                 except KeyError, err:
-                    print traceback.format_exc()
+                    #print traceback.format_exc()
                     try:
-                        newJson['_command'] = data['_command']
+                        newJson['_comment'] = data['_command']
                     except KeyError:
                         pass
 
@@ -577,7 +577,7 @@ class VirtualMachineSettings(QtWidgets.QDialog):
             self.jsonVariables["memory"] = memory
         if disk_size:
             self.jsonVariables["disk_size"] = disk_size
-
+            
         ##############################################
         # stacked widget[3] - user info
         ssh_user = self.ui.leUserName.text().strip()
@@ -590,11 +590,26 @@ class VirtualMachineSettings(QtWidgets.QDialog):
         else:
             self.clearJsonVariables()
             QtWidgets.QMessageBox.critical(self, "Error", "...Password mis-match, please re-enter passwords...", QtWidgets.QMessageBox.Ok)
+            self.logger.log(lp.DEBUG, "JSON data: " + str(self.jsonVariables))
 
         ##############################################
         # stacked widget[4] - proxies
-            self.logger.log(lp.DEBUG, "JSON data: " + str(self.jsonVariables))
-
+        http_proxy = self.ui.leHttpProxy.text().strip()
+        https_proxy = self.ui.leHttpsProxy.text().strip()
+        ftp_proxy = self.ui.leFtpProxy.text().strip()
+        rsync_proxy = self.ui.leRsyncProxy.text().strip()
+        no_proxy = self.ui.leNoProxy.text().strip()
+        if http_proxy:
+            self.jsonVariables["http_proxy"] = http_proxy
+        if https_proxy:
+            self.jsonVariables["https_proxy"] = http_proxy
+        if ftp_proxy:
+            self.jsonVariables["ftp_proxy"] = http_proxy
+        if rsync_proxy:
+            self.jsonVariables["rsync_proxy"] = http_proxy
+        if no_proxy:
+            self.jsonVariables["no_proxy"] = http_proxy
+        
         self.pjh.saveJsonVarFile(filename, self.jsonVariables)
 
     def processVm(self):

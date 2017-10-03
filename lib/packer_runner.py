@@ -57,6 +57,7 @@ class PackerRunner(object):
         #####
         # Get and set the proxy if there is one
         shellEnviron = os.environ.copy()
+        self.logger.log(lp.DEBUG, "Env: " + str(shellEnviron))
         proxy = self.conf.getProxy()
         httpsProxy = self.conf.getHttpsProxy()
         httpProxy = self.conf.getHttpProxy()
@@ -89,11 +90,13 @@ class PackerRunner(object):
             shellEnviron['no_proxy'] = noProxy
             shellEnviron['NO_PROXY'] = noProxy
 
+        self.logger.log(lp.DEBUG, "Env With Proxies: " + str(shellEnviron))
+
         #####
         # Add specific VM if requested
         if vmImage and isinstance(vmImage, basestring):
             cmd.append("-only=" + vmImage)
-        
+
         #####
         # Add the varFile
         if varFile and isinstance(varFile, basestring):
@@ -114,7 +117,7 @@ class PackerRunner(object):
         self.logger.log(lp.DEBUG, "CMD to run: " + str(cmd))
 
         self.rw.setCommand(cmd, env=shellEnviron)
-        
+
         self.rw.waitNpassThruStdout()
-        
+
         os.chdir(returnDir)
