@@ -87,32 +87,32 @@ class ProgramOptions(object) :
                           default="/tmp/", help="Path to put the logs")
 
         #####
-        # Where to put the logs.
+        # General proxy - set all proxy values to this value
         parser.add_option("-p", "--proxy", action="store", dest="proxy", \
                           default="", help="Sets HTTP_PROXY, HTTPS_PROXY and FTP_PROXY to the value passed in.")
 
         #####
-        # Where to put the logs.
+        # To set the HTTP_PROXY setting
         parser.add_option("--http-proxy", action="store", dest="httpProxy", \
                           default="", help="Sets the http_proxy.")
 
         #####
-        # Where to put the logs.
+        # To set the HTTPS_PROXY setting
         parser.add_option("--https-proxy", action="store", dest="httpsProxy", \
                           default="", help="Sets the https_proxy.")
 
         #####
-        # Where to put the logs.
+        # To set the FTP_PROXY setting
         parser.add_option("--ftp-proxy", action="store", dest="ftpProxy", \
                           default="", help="Sets the ftp_proxy.")
 
         #####
-        # Where to put the logs.
+        # To set the RSYNC_PROXY setting
         parser.add_option("--rsync-proxy", action="store", dest="rsyncProxy", \
                           default="", help="Sets the rsync_proxy.")
 
         #####
-        # Where to put the logs.
+        # To set the NO_PROXY setting
         parser.add_option("--no-proxy", action="store", dest="noProxy", \
                           default="", help="Sets the no_proxy.")
 

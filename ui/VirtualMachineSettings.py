@@ -118,7 +118,13 @@ class VirtualMachineSettings(QtWidgets.QDialog):
         self.varFilePath = self.conf.getCurrentVarFilePath()
         self.templateFilePath = ""
         self.workingDir = os.path.abspath(os.path.dirname(self.varFilePath))
-
+        self.logger.log(lp.DEBUG, ".")
+        self.logger.log(lp.DEBUG, ".")
+        self.logger.log(lp.DEBUG, ".")
+        self.logger.log(lp.DEBUG, "Working dir: " + str(self.workingDir))
+        self.logger.log(lp.DEBUG, ".")
+        self.logger.log(lp.DEBUG, ".")
+        self.logger.log(lp.DEBUG, ".")
         self.loadValuesToUI(self.varFilePath)
         self.selectGeneral()
 
@@ -301,23 +307,38 @@ class VirtualMachineSettings(QtWidgets.QDialog):
         ##############################################
         # stacked widget[4] - proxy info
         httpProxy = pjh.getHttpProxy()
-        if httpProxy:
+        confHttpProxy = self.conf.getHttpProxy()
+        if confHttpProxy:
+            self.ui.leHttpProxy.setText(confHttpProxy)
+        elif httpProxy:
             self.ui.leHttpProxy.setText(httpProxy)
 
         httpsProxy = pjh.getHttpsProxy()
-        if httpsProxy:
+        confHttpsProxy = self.conf.getHttpsProxy()
+        if confHttpsProxy:
+            self.ui.leHttpsProxy.setText(confHttpsProxy)
+        elif httpsProxy:
             self.ui.leHttpsProxy.setText(httpsProxy)
 
         ftpProxy = pjh.getFtpProxy()
-        if ftpProxy:
+        confFtpProxy = self.conf.getFtpProxy()
+        if confFtpProxy:
+            self.ui.leFtpProxy.setText(confFtpProxy)
+        elif ftpProxy:
             self.ui.leFtpProxy.setText(ftpProxy)
 
         rsyncProxy = pjh.getRsyncProxy()
-        if rsyncProxy:
+        confRsyncProxy = self.conf.getRsyncProxy()
+        if confRsyncProxy:
+            self.ui.leRsyncProxy.setText(confRsyncProxy)
+        elif rsyncProxy:
             self.ui.leRsyncProxy.setText(rsyncProxy)
 
         noProxy = pjh.getNoProxy()
-        if noProxy:
+        confNoProxy = self.conf.getNoProxy()
+        if confNoProxy:
+            self.ui.leNoProxy.setText(confNoProxy)
+        elif noProxy:
             self.ui.leNoProxy.setText(noProxy)
 
     def clearJsonVariables(self):
@@ -493,7 +514,7 @@ class VirtualMachineSettings(QtWidgets.QDialog):
                 newJson['post-processors'] = copy.deepcopy(data['post-processors'])
                 newJson['post-processors'][0]['keep_input_artifact'] = True
                 newJson['builders'] = []
-        
+
                 #vmtypes = ['vmware-iso', 'virtualbox-iso', 'parallels-iso']
                 #includeVagrant = False
 

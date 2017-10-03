@@ -599,15 +599,17 @@ class MacOSUser(ManageUserTemplate):
             self.logger.log(lp.INFO, "check password...")
         else:
             
-            self.runner.setCommand(['/bin/echo', 'hello world'])
+            self.runner.setCommand(['/bin/echo', 'HelloWorld'])
+            output, error, retcode = self.runner.runAs(user.strip(), password.strip())
             
-            output, error, retcode = self.runWith.runAs(user, password)
+            #self.logger.log(lp.DEBUG, "Output: " + str(output.strip()))
             
-            self.logger.log(lp.DEBUG, "Output: " + str(output.strip()))
-            
-            if re.match("^hello world$", output.strip()):
+            if not retcode:
                 authenticated = True
 
+        #self.logger.log(lp.DEBUG, "output: " + str(output))
+        #self.logger.log(lp.DEBUG, "error: " + str(error))
+        #self.logger.log(lp.DEBUG, "retcode: " + str(retcode))
         self.logger.log(lp.DEBUG, "authenticated: " + str(authenticated))
         return authenticated
 
