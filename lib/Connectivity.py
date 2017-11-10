@@ -75,7 +75,7 @@ class Connectivity(object):
         except socket.gaierror, err:
             msg = "Can't connect to server, socket problem: " + str(err)
             self.logger.log(lp.ERROR, msg)
-        except socket.herror, exerr:
+        except socket.herror, err:
             msg = "Can't connect to server, socket problem: " + str(err)
             self.logger.log(lp.ERROR, msg)
         except socket.timeout, err:

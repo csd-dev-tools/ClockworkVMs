@@ -23,14 +23,14 @@ from .loggers import CyLogger
 from .loggers import LogPriority as lp
 from .get_libc import getLibc
 
-def OSNotValidForRunWith(BaseException):
+class OSNotValidForRunWith(BaseException):
     """
     Custom Exception
     """
     def __init__(self, *args, **kwargs):
         Exception.__init__(self, *args, **kwargs)
 
-def NotACyLoggerError(BaseException):
+class NotACyLoggerError(BaseException):
     """
     Custom Exception
     """
