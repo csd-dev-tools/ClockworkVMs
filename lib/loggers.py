@@ -29,21 +29,21 @@ import logging.handlers
 ###############################################################################
 # Exception setup
 
-def IllegalExtensionTypeError(Exception):
+class IllegalExtensionTypeError(Exception):
     """
     Custom Exception
     """
     def __init__(self,*args,**kwargs):
         Exception.__init__(self,*args,**kwargs)
 
-def IllegalLoggingLevelError(Exception):
+class IllegalLoggingLevelError(Exception):
     """
     Custom Exception
     """
     def __init__(self,*args,**kwargs):
         Exception.__init__(self,*args,**kwargs)
 
-def EnvironmentError(Exception):
+class EnvironmentError(Exception):
     """
     Custom Exception
     """
@@ -95,7 +95,7 @@ class CyLogger(object):
     def __init__(self, environ=False, debug_mode=False, verbose_mode=False, level=30, *args, **kwargs):
         """
         """
-        print ".............Level: " + str(level)
+        #print ".............Level: " + str(level)
         self.lvl = int(level)
         '''
         if environ:
@@ -328,7 +328,7 @@ class CyLogger(object):
 
     #############################################
 
-    def log(self, priority, msg):
+    def log(self, priority=0, msg=""):
         """
         Interface to work similar to Stonix's LogDispatcher.py
 
@@ -341,6 +341,9 @@ class CyLogger(object):
             validatedLvl = int(pri)
         else:
             raise IllegalLoggingLevelError("Cannot log at this priority level: " + pri)
+        
+        if not msg:
+            return
         
         ####
         # Use the datetime library to get the time for a timestamp
@@ -395,10 +398,14 @@ class CyLogger(object):
                                                  str(function_name), 
                                                  str(line_number))
         msg_list = []
-        if not isinstance(msg, list):
-            msg_list = msg.split("\n")
+        if isinstance(msg, list):
+            msg_list = msg
+        elif isinstance(msg, basestring):
+            first_msg_list = msg.split("\n")
+            for mymsg in first_msg_list:
+                msg_list.append(mymsg + "\n")
         elif isinstance(msg, dict):
-            for key, value in msg.iteritems(msg):
+            for key, value in msg.iteritems():
                 msg_list.append(str(key) + " : " + str(value))
         else:
             msg_list = msg

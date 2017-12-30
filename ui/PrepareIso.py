@@ -183,11 +183,11 @@ class PrepareIso(QtWidgets.QDialog):
         if re.match("^InstallESD.*", dmgName):
             dmgName = "OSX_" + str(dmgName)
         self.logger.log(lp.DEBUG, "dmgName: " + str(dmgName))
-        dmgVersSearch = re.search("OSX_InstallESD_(\d+\.\d+)\..*_\w+\.dmg", dmgName)
+        dmgVersSearch = re.search("OSX_InstallESD_(\d+\.\d+).+\.dmg", dmgName)
         dmgVersion = ""
         try:
             dmgVersion = dmgVersSearch.group(1)
-        except KeyError, err:
+        except AttributeError, err:
             self.logger.log(lp.DEBUG, traceback.format_exc(err))
 
         dmgVersion = re.sub("\.", "", dmgVersion)
