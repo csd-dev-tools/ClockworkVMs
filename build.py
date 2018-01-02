@@ -31,6 +31,7 @@ Date refactor initiated - 11/7/2016
 @authors: Eric Ball, Roy Nielsen
 '''
 #--- Python specific libraries
+from __future__ import absolute_import
 import os
 import re
 import sys
@@ -45,15 +46,13 @@ from subprocess import Popen, STDOUT, PIPE, call
 from shutil import rmtree, copy2
 from ConfigParser import SafeConfigParser
 
-# For setupRamdisk() and detachRamdisk()
-sys.path.append("./ramdisk/")
 from ramdisk.macRamdisk import RamDisk, detach
-from ramdisk.lib.loggers import CyLogger
-from ramdisk.lib.loggers import LogPriority as lp
-from ramdisk.lib.get_libc import getLibc
-from ramdisk.lib.run_commands import RunWith
-from ramdisk.lib.manage_user.manage_user import ManageUser
-from ramdisk.lib.manage_keychain.manage_keychain import ManageKeychain
+from .lib.loggers import CyLogger
+from .lib.loggers import LogPriority as lp
+from .lib.getLibc import getLibc
+from .lib.run_commands import RunWith
+from .lib.manage_user.manage_user import ManageUser
+from .lib.manage_keychain.manage_keychain import ManageKeychain
 
 #####
 # Exception for when the conf file can't be grokked.

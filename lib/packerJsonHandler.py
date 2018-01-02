@@ -1,14 +1,12 @@
 #!/usr/bin/python
+from __future__ import absolute_import
 import re
 import json
 import traceback
-from libHelperFunctions import isSaneFilePath
-from loggers import LogPriority as lp
 
-#jfp = open("macos1010.json", "r")
-#jstuff = json.load(jfp)
-#print str(jstuff)
-#jfp.close()
+from . libHelperFunctions import isSaneFilePath
+from . loggers import LogPriority as lp
+
 
 class PackerJsonHandler():
     '''

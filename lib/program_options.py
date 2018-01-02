@@ -26,17 +26,13 @@ import os
 from optparse import OptionParser, SUPPRESS_HELP
 
 #####
-# PNpass libraries
-from .conf import Conf
-from .loggers import CyLogger
-from .loggers import LogPriority as lp
-from .libHelperFunctions import get_console_user
-from .libMacOSHelperFunctions import getResourcesDir
-
-#####
-# Stonix libraries
-from .environment import Environment
-from logging import root
+# home grown libraries
+from . conf import Conf
+from . loggers import CyLogger
+from . loggers import LogPriority as lp
+from . libHelperFunctions import get_console_user
+from . libMacOSHelperFunctions import getResourcesDir
+from . environment import Environment
 
 
 class ProgramOptions(object) :

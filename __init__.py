@@ -1,2 +1,2 @@
-__all__ = ['lib', 'ui']
+__all__ = ['lib', 'ui', 'tests']
 

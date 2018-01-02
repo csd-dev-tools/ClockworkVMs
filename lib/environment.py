@@ -59,7 +59,6 @@ try:
 except:
     VERSION = '0.0.1'
 
-# FISMACAT must be one of ['high', 'medium', 'low']
 try:
     from localize import FISMACAT
 except:

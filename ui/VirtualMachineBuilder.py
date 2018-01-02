@@ -16,7 +16,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 
 #####
 # Import local shared libraries
-from lib.get_libc import getLibc
+from lib.getLibc import getLibc
 from lib.loggers import CyLogger
 from lib.run_commands import RunWith
 from lib.Connectivity import Connectivity

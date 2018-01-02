@@ -19,9 +19,9 @@ import threading
 import traceback
 from subprocess import Popen, PIPE
 
-from .loggers import CyLogger
-from .loggers import LogPriority as lp
-from .get_libc import getLibc
+from . loggers import CyLogger
+from . loggers import LogPriority as lp
+from . getLibc import getLibc
 
 class OSNotValidForRunWith(BaseException):
     """
@@ -92,15 +92,23 @@ class RunWith(object):
         #####
         # Handle Popen's shell, or "myshell"...
         if isinstance(command, list):
+            if not command:
+                raise ValueError("Cannot work with an empty list!")
             self.printcmd = " ".join(command)
             self.command = command
-        if isinstance(command, basestring) :
+        elif isinstance(command, basestring) :
+            if not command:
+                raise ValueError("Cannot work with an empty string!")
+            #myshell = True
             self.command = command
             self.printcommand = command
+        else:
+            raise TypeError("Command cannot be this type: " + str(type(command)))
+
         if myshell and isinstance(myshell, bool):
             self.myshell = myshell
         else:
-            self.myshell = False
+            self.myshell = True
         if env and isinstance(env, dict):
             self.environ = env
         else:
@@ -194,16 +202,14 @@ class RunWith(object):
         self.returncode = 999
         if self.command:
             try:
-                proc = Popen(self.command, stdout=PIPE, stderr=PIPE,
-                             shell=self.myshell, 
-                             env=self.environ,
-                             close_fds=self.cfds)
+                proc = Popen(self.command, stdout=PIPE, stderr=PIPE, shell=self.myshell, env=self.environ, close_fds=self.cfds)
                 self.libc.sync()
                 self.output, self.error = proc.communicate()
                 self.libc.sync()
             except Exception, err :
                 self.logger.log(lp.WARNING, "- Unexpected Exception: "  + \
-                           str(err)  + " command: " + self.printcmd)
+                           str(err)  + " command: " + str(self.printcmd))
+                self.logger.log(lp.WARNING, "stdout: " + str(self.output))
                 self.logger.log(lp.WARNING, "stderr: " + str(self.error))
                 self.logger.log(lp.WARNING, traceback.format_exc())
                 self.logger.log(lp.WARNING, str(err))
@@ -213,7 +219,7 @@ class RunWith(object):
                 self.returncode = str(proc.returncode)
                 proc.stdout.close()
             finally:
-                self.logger.log(lp.DEBUG, "Done with command: " + self.printcmd)
+                self.logger.log(lp.DEBUG, "Done with command: " + str(self.printcmd))
         else :
             self.logger.log(lp.WARNING, "Cannot run a command that is empty...")
             self.output = None

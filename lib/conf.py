@@ -1,10 +1,11 @@
+from __future__ import absolute_import
 # import standard libraries
 import re
 import os
 
 # local, program specific library
-from .loggers import CyLogger
-from .loggers import LogPriority as lp
+from . loggers import CyLogger
+from . loggers import LogPriority as lp
 
 
 class Conf(object) :

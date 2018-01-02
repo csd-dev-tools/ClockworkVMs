@@ -12,9 +12,9 @@ import platform
 import traceback
 
 #--- non-native python libraries in this source tree
-from .loggers import CyLogger
-from .loggers import LogPriority as lp
-from .run_commands import RunWith
+from . loggers import CyLogger
+from . loggers import LogPriority as lp
+from . run_commands import RunWith
 
 logger = CyLogger()
 run = RunWith(logger)

@@ -6,16 +6,15 @@ To maintain module versions.
 
 @author: Roy Nielsen
 """
+from __future__ import absolute_import
 import os
 import re
 import sys
 import argparse
 from datetime import datetime
 
-
-
-from loggers import CyLogger
-from loggers import LogPriority as lp
+from . loggers import CyLogger
+from . loggers import LogPriority as lp
 
 class SedFile4VersionStamp(object):
     def __init__(self, files=[], logger=None):

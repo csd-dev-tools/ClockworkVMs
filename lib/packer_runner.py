@@ -1,9 +1,10 @@
+from __future__ import absolute_import
 import os
 import re
 import traceback
 
-from run_commands import RunWith
-from loggers import LogPriority as lp
+from . run_commands import RunWith
+from . loggers import LogPriority as lp
 
 class MissingParameterError(Exception):
     """

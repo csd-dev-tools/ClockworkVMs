@@ -36,7 +36,7 @@ import re
 import traceback
 from distutils.version import LooseVersion
 #--- non-native python libraries in this source tree
-from .loggers import LogPriority
+from . loggers import LogPriority
 
 
 class CheckApplicable(object):
