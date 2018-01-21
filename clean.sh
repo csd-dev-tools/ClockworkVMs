@@ -27,5 +27,9 @@ rm *.log
 rm *.old
 rm *.xml
 find . -iname "*.pyc" -print -exec rm {} \;
-rm -rf build
+
 rm -rf dist
+rm -rf build
+rm -rf ~/Library/Application\ Support/pyinstaller/*
+rm *.log
+

@@ -18,6 +18,7 @@ from lib.loggers import LogPriority as lp
 from lib.loggers import CyLogger
 from lib.libHelperExceptions import UnsupportedOSError, NotACyLoggerError
 
+
 class ManageKeychain(object):
     """
     Factory object for acquiring the right keychain manager

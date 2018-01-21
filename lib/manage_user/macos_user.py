@@ -247,17 +247,7 @@ class MacOSUser(ManageUserTemplate):
                             else:
                                 propertyAttribute = propertyAttribute + ", " + line
         return success, {userName : properties }
-            try:
-                userInfo = output.split()[1]
-            except (KeyError, IndexError), err:
-                self.logger.log(lp.INFO, "Error attempting to find user" + \
-                                         str(userName) + " in the " + \
-                                         "directory service.")
-        else:
-            raise BadUserInfoError("Need a valid user name...")
 
-        return userInfo
-        '''
     #----------------------------------------------------------------------
 
     def getUserShell(self, userName=""):
@@ -614,9 +604,9 @@ class MacOSUser(ManageUserTemplate):
             if not retcode:
                 authenticated = True
 
-        #self.logger.log(lp.DEBUG, "output: " + str(output))
-        #self.logger.log(lp.DEBUG, "error: " + str(error))
-        #self.logger.log(lp.DEBUG, "retcode: " + str(retcode))
+        # self.logger.log(lp.DEBUG, "output: " + str(output))
+        # self.logger.log(lp.DEBUG, "error: " + str(error))
+        # self.logger.log(lp.DEBUG, "retcode: " + str(retcode))
         self.logger.log(lp.DEBUG, "authenticated: " + str(authenticated))
         return authenticated
 
