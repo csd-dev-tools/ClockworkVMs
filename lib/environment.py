@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 ###############################################################################
 #                                                                             #
 # Copyright 2015.  Los Alamos National Security, LLC. This material was       #
@@ -49,19 +48,18 @@ import re
 import sys
 import socket
 import subprocess
-import types
 import platform
 import pwd
 import time
 
 try:
-    from localize import VERSION
+    from lib.localize import VERSION
 except:
     VERSION = '0.0.1'
 
 # FISMACAT must be one of ['high', 'medium', 'low']
 try:
-    from localize import FISMACAT
+    from lib.localize import FISMACAT
 except:
     FISMACAT = 'low'
 
@@ -150,7 +148,7 @@ class Environment(object):
         @author: D. Kennel
         """
         try:
-            if isinstance(bool, debugmode):
+            if isinstance(debugmode, bool):
                 self.debugmode = debugmode
         except NameError:
             # debugmode was undefined
@@ -280,8 +278,8 @@ class Environment(object):
         # Alternative (better) implementation for Linux
         if os.path.exists('/usr/bin/lsb_release'):
             proc = subprocess.Popen('/usr/bin/lsb_release -dr',
-                                  shell=True, stdout=subprocess.PIPE,
-                                  close_fds=True)
+                                    shell=True, stdout=subprocess.PIPE,
+                                    close_fds=True)
             description = proc.stdout.readline()
             release = proc.stdout.readline()
             description = description.split()
@@ -764,10 +762,10 @@ class Environment(object):
                                     stdout=subprocess.PIPE, close_fds=True)
             netdata = proc.stdout.readlines()
             for line in netdata:
-                print "processing: " + line
+                # print "processing: " + line
                 match = re.search(littlesnitch, line)
                 if match is not None:
-                    print 'LittleSnitch Is Running'
+                    # print 'LittleSnitch Is Running'
                     issnitchactive = True
                     break
         return issnitchactive
@@ -783,11 +781,8 @@ class Environment(object):
 
         @author: Roy Nielsen
         """
-        try:
-            script_path_zero = sys._MEIPASS
-        except AttributeError:
-            script_path_zero = os.path.realpath(sys.argv[0])
-
+        script_path_zero = getattr(sys, '_MEIPASS',
+                                   os.path.dirname(os.path.abspath(__file__)))
         try:
             script_path_one = os.path.realpath(sys.argv[1])
         except IndexError:
@@ -797,16 +792,18 @@ class Environment(object):
         #####
         # Check which argv variable has the script name -- required to allow
         # for using the eclipse debugger.
-        if re.search("stonix.py$", script_path_zero) or re.search("stonix$", script_path_zero):
+        if re.search("stonix.py$", script_path_zero) or \
+           re.search("stonix$", script_path_zero):
             #####
             # Run normally
             self.script_path = os.path.dirname(os.path.realpath(sys.argv[0]))
         else:
             #####
-            # Run with Eclipse debugger -- Eclipse debugger will never try to run
-            # the "stonix" binary blob created by pyinstaller, so don't include
-            # here.
-            #print "DEBUG: Environment.collectpaths: unexpected argv[0]: " + str(sys.argv[0])
+            # Run with Eclipse debugger -- Eclipse debugger will never try
+            # to run the "stonix" binary blob created by pyinstaller,
+            # so don't include here.
+            # print "DEBUG: Environment.collectpaths: unexpected argv[0]" + \
+            #       ": " + str(sys.argv[0])
             if re.search("stonix.py$", script_path_one) or \
                re.search("stonixtest.py$", script_path_one):
                 script = script_path_one.split("/")[-1]
@@ -818,36 +815,24 @@ class Environment(object):
                    os.path.exists(os.path.join(script_path, "stonix.py")):
                     self.test_mode = True
                     self.script_path = os.path.dirname(os.path.realpath(sys.argv[1]))
-                else:
-                    print "ERROR: Cannot run using this method"
+                # else:
+                #    print "ERROR: Cannot run using this method"
             else:
-                #print "DEBUG: Cannot find appropriate path, building paths for current directory"
-                try:
-                    self.script_path = sys._MEIPASS
-                except AttributeError:
-                    self.script_path = os.path.dirname(os.path.realpath(sys.argv[0]))
+                # print "DEBUG: Cannot find appropriate path, building " +\
+                #       "paths for current directory"
+                script_path_zero = getattr(sys, '_MEIPASS',
+                                           os.path.dirname(os.path.abspath(__file__)))
 
         #####
         # Set the rules & stonix_resources paths
-        if re.search("stonix.app/Contents/MacOS$", self.script_path):
-            #####
-            # Find the stonix.conf file in the stonix.app/Contents/Resources
-            # directory
-            macospath = self.script_path
-            self.resources_path = os.path.join(self.script_path,
-                                               "stonix_resources")
-            self.rules_path = os.path.join(self.resources_path,
-                                           "rules")
-        else:
-            # ##
-            # create the self.resources_path
-            self.resources_path = os.path.join(self.script_path,
-                                               "stonix_resources")
-            # ##
-            # create the self.rules_path
-            self.rules_path = os.path.join(self.script_path,
-                                           "stonix_resources",
-                                           "rules")
+        # ##
+        # create the self.resources_path
+        self.resources_path = os.path.abspath(os.path.dirname(__file__))
+
+        #####
+        # create the self.rules_path
+        self.rules_path = self.resources_path + "/rules"
+
         #####
         # Set the log file path
         if self.geteuid() == 0:
@@ -864,26 +849,7 @@ class Environment(object):
 
         #####
         # Set the configuration file path
-        if re.search("stonix.app/Contents/MacOS/stonix$", os.path.realpath(sys.argv[0])):
-            #####
-            # Find the stonix.conf file in the stonix.app/Contents/Resources
-            # directory
-            macospath = self.script_path
-            parents = macospath.split("/")
-            parents.pop()
-            parents.append("Resources")
-            resources_dir = "/".join(parents)
-            self.conf_path = os.path.join(resources_dir, "stonix.conf")
-        elif os.path.exists(os.path.join(self.script_path, "etc", "stonix.conf")):
-            self.conf_path = os.path.join(self.script_path, "etc", "stonix.conf")
-        elif re.search('pydev', script_path_zero) and re.search('stonix_resources', script_path_one):
-            print "INFO: Called by unit test"
-            srcpath = script_path_one.split('/')[:-2]
-            srcpath = '/'.join(srcpath)
-            self.conf_path = os.path.join(srcpath, 'etc', 'stonix.conf')
-            print self.conf_path
-        else:
-            self.conf_path = "/etc/stonix.conf"
+        self.conf_path = "/etc/stonix.conf"
 
     def determinefismacat(self):
         '''
@@ -972,7 +938,7 @@ class Environment(object):
         @param num: int - number of rules that apply to this host
         @author: dkennel
         '''
-        if isinstance(int, num):
+        if not isinstance(num, int):
             raise TypeError('Number of rules must be an integer')
         elif num < 0:
             raise ValueError('Number of rules must be a positive integer')

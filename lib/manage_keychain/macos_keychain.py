@@ -10,11 +10,10 @@ import re
 import pwd
 ##########
 # local app libraries
-from ..run_commands import RunWith
-from ..loggers import CyLogger
-from ..loggers import LogPriority as lp
-from ..manage_user.macos_user import MacOSUser
-from .manage_keychain_template import ManageKeychainTemplate
+from lib.run_commands import RunWith
+from lib.loggers import LogPriority as lp
+from lib.manage_user.macos_user import MacOSUser
+from lib.manage_keychain.manage_keychain_template import ManageKeychainTemplate
 
 class UnsupportedSecuritySubcommand(Exception):
     """
@@ -56,7 +55,7 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
 
         @param: the commandDict should be in the format below:
 
-        cmd = { "set-keychain-password" : [oldPass, newPass, "'" + keychain + "'"] }
+        cmd = {"set-keychain-password": [oldPass, newPass, "'" + keychain + "'"]}
 
         where the key is the security 'subcommand' and the list is an ordered
         list of the arguments to give the subcommand.
@@ -244,21 +243,22 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
                             "default-keychain",
                             "login-keychain"]
 
-        if not subCommand in validSubcommands:
+        if subCommand not in validSubcommands:
             return success, False, False, False
         else:
             validDomains = ['user', 'system', 'common', 'dynamic']
 
             #####
             # Input validation
-            if setList and self.isSaneFilePath(keychain) and os.path.exists(keychain):
+            if setList and self.isSaneFilePath(keychain) and \
+               os.path.exists(keychain):
                 options += ['-s', keychain]
 
             if prefDomain in validDomains:
                 options += ['-d', prefDomain]
 
             #####
-            # Command setup 
+            # Command setup
             cmd = {subCommand: options}
             self.logger.log(lp.DEBUG, "Sending: " + str(cmd))
 
@@ -283,7 +283,8 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
         keychain = keychain.strip()
         prefDomain = prefDomain.strip()
 
-        success, output, _, _ = self.catOne("list-keychains", prefDomain, keychain, setList)
+        success, output, _, _ = self.catOne("list-keychains", prefDomain,
+                                            keychain, setList)
 
         return success, output
 
@@ -315,7 +316,6 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
 
         @author: Roy Nielsen
         '''
-        success = False
         keychain = keychain.strip()
         prefDomain = prefDomain.strip()
 
@@ -344,7 +344,7 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
             # Note: this is done in the build of the command, rather than
             # the build of the variable.
             cmd = {"create-keychain": ["-p", passwd, keychain]}
-            success, stdout, stderr, retcode = self.runSecurityCommand(cmd)
+            success, _, _, _ = self.runSecurityCommand(cmd)
 
         return success
 
@@ -378,11 +378,11 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
             # Note: this is done in the build of the command, rather than
             # the build of the variable.
             cmd = {"delete-keychain": [keychain]}
-            success, stdout, stderr, retcode = self.runSecurityCommand(cmd)
+            success, _, _, _ = self.runSecurityCommand(cmd)
 
         return success
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def lockKeychain(self, keychain="", allKeychains=False):
         """
@@ -390,7 +390,7 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
 
         @parameter: keychain - full path to the keychain to unlock
 
-        @note: 
+        @note:
         security unlock-keychain -p <passwd>
 
         @author: Roy Nielsen
@@ -403,18 +403,18 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
             #####
             # Command setup - note that the keychain deliberately has quotes
             # around it - there could be spaces in the path to the keychain,
-            # so the quotes are required to fully resolve the file path.  
-            # Note: this is done in the build of the command, rather than 
+            # so the quotes are required to fully resolve the file path.
+            # Note: this is done in the build of the command, rather than
             # the build of the variable.
             if allKeychains:
-                cmd = { "lock-keychain" : ["-a"] }
+                cmd = {"lock-keychain": ["-a"]}
             else:
-                cmd = { "lock-keychain" : [keychain] }
-            success, stdout, stderr, retcode = self.runSecurityCommand(cmd)
+                cmd = {"lock-keychain": [keychain]}
+            success, stdout, _, _ = self.runSecurityCommand(cmd)
 
         return success, stdout
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def unlockKeychain(self, passwd="", keychain=""):
         """
@@ -424,7 +424,7 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
 
         @parameter: keychain - full path to the keychain to unlock
 
-        @note: 
+        @note:
         security unlock-keychain -p <passwd>
 
         @author: Roy Nielsen
@@ -439,8 +439,8 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
             #####
             # Command setup - note that the keychain deliberately has quotes
             # around it - there could be spaces in the path to the keychain,
-            # so the quotes are required to fully resolve the file path.  
-            # Note: this is done in the build of the command, rather than 
+            # so the quotes are required to fully resolve the file path.
+            # Note: this is done in the build of the command, rather than
             # the build of the variable.
             cmd = { "unlock-keychain" : ["-p", passwd, keychain] }
             success, output, error, retcode = self.runSecurityCommand(cmd)
@@ -450,12 +450,13 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
             self.logger.log(lp.DEBUG, "Return code: " + str(retcode))
         return success, output
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
-    def changeKeychainPassword(self, user="",
-                                     oldPass=False,
-                                     newPass=False,
-                                     keychain=False):
+    def changeKeychainPassword(self,
+                               user="",
+                               oldPass=False,
+                               newPass=False,
+                               keychain=False):
         """
         Use the "security" command to set the login keychain.  If it has not
         been created, create the login keychain.
@@ -492,10 +493,10 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
             #####
             # Command setup - note that the keychain deliberately has quotes
             # around it - there could be spaces in the path to the keychain,
-            # so the quotes are required to fully resolve the file path.  
-            # Note: this is done in the build of the command, rather than 
+            # so the quotes are required to fully resolve the file path.
+            # Note: this is done in the build of the command, rather than
             # the build of the variable.
-            cmd = { "set-keychain-password" : ["-o", oldPass, "-p", newPass, keychain] }
+            cmd = {"set-keychain-password": ["-o", oldPass, "-p", newPass, keychain]}
             self.logger.log(lp.DEBUG, "cmd: " + str(cmd))
             success, stdout, stderr, retcode = self.runSecurityCommand(cmd)
             self.logger.log(lp.DEBUG, "stdout: " + str(stdout))
@@ -504,14 +505,14 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
 
         return success, stdout
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def showKeychainInfo(self, keychain, *args, **kwargs):
         '''
         Show the settings for a keychain.
 
         @param: keychain - keychain to acquire information about
-        
+
         @author: Roy Nielsen
         '''
         success = False
@@ -523,16 +524,16 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
             #####
             # Command setup - note that the keychain deliberately has quotes
             # around it - there could be spaces in the path to the keychain,
-            # so the quotes are required to fully resolve the file path.  
-            # Note: this is done in the build of the command, rather than 
+            # so the quotes are required to fully resolve the file path.
+            # Note: this is done in the build of the command, rather than
             # the build of the variable.
-            cmd = { "show-keychain-info" : [keychain] }
+            cmd = {"show-keychain-info": [keychain]}
             self.logger.log(lp.DEBUG, "cmd: " + str(cmd))
-            success, stdout, stderr, retcode = self.runSecurityCommand(cmd)
+            success, stdout, _, _ = self.runSecurityCommand(cmd)
 
         return success, stdout
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def dumpKeychain(self, *args, **kwargs):
         '''
@@ -542,21 +543,19 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
 
         @author: Roy Nielsen
         '''
-        success = False
-        stdout = False
         #####
         # Command setup - note that the keychain deliberately has quotes
         # around it - there could be spaces in the path to the keychain,
-        # so the quotes are required to fully resolve the file path.  
-        # Note: this is done in the build of the command, rather than 
+        # so the quotes are required to fully resolve the file path.
+        # Note: this is done in the build of the command, rather than
         # the build of the variable.
-        cmd = { "dump-keychain" : [] }
+        cmd = {"dump-keychain": []}
         self.logger.log(lp.DEBUG, "cmd: " + str(cmd))
-        success, stdout, stderr, retcode = self.runSecurityCommand(cmd)
+        success, stdout, _, _ = self.runSecurityCommand(cmd)
 
         return success, stdout
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def findCertificate(self, name='', keychain='', *args, **kwargs):
         '''
@@ -572,39 +571,39 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
         stdout = False
         name = name.strip()
         keychain = keychain.strip()
-        
+
         if not name or not isinstance(name, basestring):
             return success, stdout
         else:
             #####
             # Command setup - note that the keychain deliberately has quotes
             # around it - there could be spaces in the path to the keychain,
-            # so the quotes are required to fully resolve the file path.  
-            # Note: this is done in the build of the command, rather than 
+            # so the quotes are required to fully resolve the file path.
+            # Note: this is done in the build of the command, rather than
             # the build of the variable.
             if self.isSaneFilePath(keychain) and os.path.exists(keychain):
-                cmd = { "find-certificate" : ["-a", "-c", name, "-p", keychain] }
+                cmd = {"find-certificate": ["-a", "-c", name, "-p", keychain]}
             else:
-                cmd = { "find-certificate" : ["-a", "-c", name, "-p"] }
+                cmd = {"find-certificate": ["-a", "-c", name, "-p"]}
             self.logger.log(lp.DEBUG, "cmd: " + str(cmd))
-            success, stdout, stderr, retcode = self.runSecurityCommand(cmd)
+            success, stdout, _, _ = self.runSecurityCommand(cmd)
 
         return success, stdout
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def findIdentity(self, valid=True, policy='', sstring='', keychain='', *args, **kwargs):
         '''
-        Find an identity (certificate + private key).  Only shows valid identities.
+        Find an identity (certificate + private key).  Only shows valid
+        identities.
 
         @param: policy - value  in a list of validProperties in this method
         @param: sstring - search string
-        @param: keychain - (optional) - keychain to search, otherwise the search list.
+        @param: keychain - (optional) - keychain to search, otherwise the
+                                        search list.
 
         @author: Roy Nielsen
         '''
-        success = False
-        stdout = False
         policy = policy.strip()
         keychain = keychain.strip()
         sstring = sstring.strip()
@@ -613,7 +612,7 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
         validPolicies = ["basic", "ssl-client", "ssl-server", "smime", "eap",
                          "ipsec", "ichat", "codesigning", "sys-default", 
                          "sys-kerberos-kdc"]
-        
+
         if policy in validPolicies:
             #####
             # Only add the policy option if it in the valid set
@@ -643,7 +642,7 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
         #####
         # Run the command.
         success, stdout, stderr, retcode = self.runSecurityCommand(cmd)
-        
+
         self.logger.log(lp.DEBUG, str(success))
         self.logger.log(lp.DEBUG, str(stdout))
         self.logger.log(lp.DEBUG, str(stderr))
@@ -651,7 +650,7 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
 
         return success, stdout
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def authorize(self, options='', right='', *args, **kwargs):
         '''
@@ -673,8 +672,8 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
             #####
             # Command setup - note that the keychain deliberately has quotes
             # around it - there could be spaces in the path to the keychain,
-            # so the quotes are required to fully resolve the file path.  
-            # Note: this is done in the build of the command, rather than 
+            # so the quotes are required to fully resolve the file path.
+            # Note: this is done in the build of the command, rather than
             # the build of the variable.
             if right and isinstance(right, basestring):
                 cmd = {"authorize": [options, right]}
@@ -683,7 +682,7 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
 
         return success, stdout
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def error(self, ecode='', *args, **kwargs):
         '''
@@ -703,27 +702,28 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
             #####
             # Command setup - note that the keychain deliberately has quotes
             # around it - there could be spaces in the path to the keychain,
-            # so the quotes are required to fully resolve the file path.  
-            # Note: this is done in the build of the command, rather than 
+            # so the quotes are required to fully resolve the file path.
+            # Note: this is done in the build of the command, rather than
             # the build of the variable.
-            cmd = { "error" : [ecode] }
+            cmd = {"error": [ecode]}
             self.logger.log(lp.DEBUG, "cmd: " + str(cmd))
-            success, stdout, stderr, retcode = self.runSecurityCommand(cmd)
+            success, stdout, _, _ = self.runSecurityCommand(cmd)
 
         return success, stdout
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
-    def setKeyPartitionList(self, options=False,
-                                  keyPass='',
-                                  keychain='',
-                                  creator = '',
-                                  description = '',
-                                  comment = '',
-                                  label = '',
-                                  keyType = '',
-                                  partIDs="apple-tool:,apple:,codesign:",
-                                  *args, **kwargs):
+    def setKeyPartitionList(self,
+                            options=False,
+                            keyPass='',
+                            keychain='',
+                            creator='',
+                            description='',
+                            comment='',
+                            label='',
+                            keyType='',
+                            partIDs="apple-tool:,apple:,codesign:",
+                            *args, **kwargs):
         '''
         Not known what exactly this subcommand does, it is required
         on MacOS Sierra to allow for signing with xcodebuild or codesign.
@@ -758,7 +758,6 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
         '''
         success = False
         stdout = False
-        name = name.strip()
         keychain = keychain.strip()
         if not options:
             options = []
@@ -849,6 +848,6 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
 
         #####
         # Spawn the command via private method
-        success, stdout, stderr, retcode = self.runSecurityCommand(cmd)
+        success, stdout, _, _ = self.runSecurityCommand(cmd)
 
         return success, stdout

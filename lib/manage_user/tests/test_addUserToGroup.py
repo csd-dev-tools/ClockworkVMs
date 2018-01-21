@@ -6,28 +6,21 @@ CommonRamdiskTemplate test.
 """
 from __future__ import absolute_import
 #--- Native python libraries
-import re
-import os
 import sys
-import time
 import unittest
-import tempfile
-import ctypes as C
 from datetime import datetime
 
 #--- non-native python libraries in this source tree
-sys.path.append("..")
+sys.path.append("../../..")
 from lib.loggers import CyLogger
 from lib.loggers import LogPriority as lp
-
-from lib.libHelperExceptions import NotValidForThisOS
 
 #####
 # Load OS specific Ramdisks
 if sys.platform.startswith("darwin"):
     #####
     # For Mac
-    from .. macos_user import MacOSUser
+    from lib.manage_user.macos_user import MacOSUser
 elif sys.platform.startswith("linux"):
     #####
     # For Linux
@@ -45,9 +38,9 @@ class test_addUserToGroup(unittest.TestCase):
         # Start timer in miliseconds
         self.test_start_time = datetime.now()
         self.logger = CyLogger()
-        
-        self.manage_user = MacOSUser()
-        
+
+        self.manage_user = MacOSUser(logDispatcher=self.logger)
+
     ##################################
 
     def setUp(self):
@@ -59,7 +52,7 @@ class test_addUserToGroup(unittest.TestCase):
         pass
 
 ###############################################################################
-##### Method Tests
+# #### Method Tests
 
     ##################################
 
@@ -98,13 +91,14 @@ class test_addUserToGroup(unittest.TestCase):
         # Calculate and log how long it took...
         test_time = (test_end_time - self.test_start_time)
 
-        self.logger.log(lp.INFO, self.__module__ + " took " + str(test_time) + " time to complete...")
+        self.logger.log(lp.INFO, self.__module__ + " took " +
+                        str(test_time) + " time to complete...")
 
 ###############################################################################
 
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
+    # import sys;sys.argv = ['', 'Test.testName']
     logger = CyLogger()
     logger.initializeLogs()
     unittest.main()

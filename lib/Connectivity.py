@@ -28,7 +28,6 @@ import re
 import ssl
 import socket
 import httplib
-import urllib
 import urllib2
 
 #--- non-native python libraries in this source tree
@@ -63,24 +62,16 @@ class Connectivity(object):
     ############################################################
 
     def is_site_socket_online(self, host):
-        """ This function checks to see if a host name has a DNS entry by checking
-            for socket info. If the website gets something in return, 
-            we know it's available to DNS.
+        """
+        This function checks to see if a host name has a DNS entry
+        by checking for socket info. If the website gets something in return,
+        we know it's available to DNS.
         """
         retval = False
         try:
             socket.setdefaulttimeout(5)
             socket.gethostbyname(host)
             retval = True
-        except socket.gaierror, err:
-            msg = "Can't connect to server, socket problem: " + str(err)
-            self.logger.log(lp.ERROR, msg)
-        except socket.herror, err:
-            msg = "Can't connect to server, socket problem: " + str(err)
-            self.logger.log(lp.ERROR, msg)
-        except socket.timeout, err:
-            msg = "Can't connect to server, socket problem: " + str(err)
-            self.logger.log(lp.ERROR, msg)
         except Exception, err:
             msg = "Can't connect to server, socket problem: " + str(err)
             self.logger.log(lp.ERROR, msg)
@@ -92,45 +83,27 @@ class Connectivity(object):
 
     ############################################################
 
-    def is_site_available(self, site="", path=""): #, path):
-        """ This function retreives the status code of a website by requesting
-            HEAD data from the host. This means that it only requests the headers.
-            If the host cannot be reached or something else goes wrong, it returns
-            False.
+    def is_site_available(self, site="", path=""):
+        """
+        This function retreives the status code of a website by requesting
+        HEAD data from the host. This means that it only requests the headers.
+        If the host cannot be reached or something else goes wrong, it returns
+        False.
 
-            This will only work if the self.set_no_proxy method is used before
-            this method is called.
+        This will only work if the self.set_no_proxy method is used before
+        this method is called.
         """
         retval = False
 
         try:
             page = site + path
-            req = urllib2.Request(page, headers={'User-Agent' : "Magic Browser"})
+            req = urllib2.Request(page, headers={'User-Agent': "Magic Browser"})
             req.add_header('User-agent', 'Firefox/31.5.0')
             request = urllib2.urlopen(req, timeout=3)
             retval = True
         except urllib2.URLError, err:
             msg = "Error trying to get web page type: " + str(err)
-            """
-            ERROR - Not working in macOS Sierra
-            try:
-                self.logger.log(lp.ERROR, msg)
-                if hasattr(err, 'code'):
-                    msg = "code - " + str(err.code)
-                    self.logger.log(lp.ERROR, msg)
-            except socket.gaierror, err:
-                msg = "Can't connect to server, socket problem: " + str(err)
-                self.logger.log(lp.DEBUG, msg)
-            except socket.herror, exerr:
-                msg = "Can't connect to server, socket problem: " + str(err)
-                self.logger.log(lp.DEBUG, msg)
-            except socket.timeout, err:
-                msg = "Can't connect to server, socket problem: " + str(err)
-                self.logger.log(lp.DEBUG, msg)
-            except Exception, err:
-                msg = "General Exception: Can't connect to server: " + str(err)
-                self.logger.log(lp.DEBUG, msg)
-            """
+            self.logger.log(lp.ERROR, msg)
         else:
             self.logger.log(lp.DEBUG, "Got the right web page type.")
 
@@ -161,31 +134,35 @@ class Connectivity(object):
                 self.logger.log(lp.DEBUG, "host: " + str(host))
                 self.logger.log(lp.DEBUG, "port: " + str(port))
                 self.logger.log(lp.DEBUG, "page: " + str(page))
-                              
+
                 if host and port:
                     #####
                     # Revert to unverified context
                     if hasattr(ssl, '_create_unverified_context'):
-                        ssl._create_default_https_context = ssl._create_unverified_context
+                        ssl._create_default_https_context = \
+                        ssl._create_unverified_context
                     #####
-                    # Create a different type of connection based on 
+                    # Create a different type of connection based on
                     # http or https...
                     if re.match("^https://.+", url):
-                        conn = httplib.HTTPSConnection(host=host, port=port, timeout=timeout, cert_file="", key_file="")
+                        conn = httplib.HTTPSConnection(host=host, port=port,
+                                                       timeout=timeout,
+                                                       cert_file="",
+                                                       key_file="")
                     elif re.match("^http://.+", url):
                         conn = httplib.HTTPConnection(host, port, timeout)
                     #####
-                    # Get the page, see if we get a return value of 200 
+                    # Get the page, see if we get a return value of 200
                     # (success)
-                    try:                    
+                    try:
                         conn.request('GET', url)
                         response = conn.getresponse()
                     except socket.error:
-                        self.logger.log(lp.INFO, "No connection " + \
-                                                           "to: " + str(url))
+                        self.logger.log(lp.INFO, "No connection " +
+                                        "to: " + str(url))
                     else:
-                        self.logger.log(lp.DEBUG, "Status: " + \
-                                                           str(response.status))
+                        self.logger.log(lp.DEBUG, "Status: " +
+                                        str(response.status))
                         if re.match("^200$", str(response.status)):
                             success = True
 
@@ -193,8 +170,8 @@ class Connectivity(object):
 
     def isUrlValid(self, url):
         """
-        Check for a valid URL - 
-        
+        Check for a valid URL -
+
         1 - cannot have multiple colons in the host portion of the url.
             one colon may separate the host and port, ie:
               proxy.example.com:8888
@@ -203,7 +180,7 @@ class Connectivity(object):
         """
         success = False
         self.logger.log(lp.DEBUG, "URL: " + str(url))
-        
+
         if isinstance(url, str) and url:
             self.logger.log(lp.DEBUG, "URL: '" + str(url) + "'")
             self.logger.log(lp.DEBUG, "URL is a string and not empty...")
@@ -219,41 +196,41 @@ class Connectivity(object):
                     #####
                     # If there is a colon in the host field, get both
                     # the hostname and the port
-                    self.logger.log(lp.DEBUG, "hostAndPort:" + \
-                                                        str(hostAndPort))
+                    self.logger.log(lp.DEBUG, "hostAndPort:" +
+                                    str(hostAndPort))
                     #####
-                    # Get the host - check if there is a port indication in the URL, 
-                    # ie. poxyout.example.com:8888 if so, get both.
+                    # Get the host - check if there is a port indication
+                    # in the URL, ie. poxyout.example.com:8888 if so, get both.
                     hostList = hostAndPort.split(":")
                     self.logger.log(lp.DEBUG, "hostList: " + str(hostList))
                     ####
-                    # Multiple colons is invalid, so raise an exception if two or 
-                    # more are found.
+                    # Multiple colons is invalid, so raise an exception if
+                    # two or more are found.
                     if len(hostList) == 2 or not re.match(":", hostList):
                         success = True
                     else:
                         #####
                         # Problem parsing the URL passed in...
-                        raise ConnectivityInvalidURL("Multiple colons in " + \
-                                                     "hostname portion " + \
+                        raise ConnectivityInvalidURL("Multiple colons in " +
+                                                     "hostname portion " +
                                                      "of the URL...")
                 elif not re.search(":", hostAndPort):
                     success = True
             else:
-                self.logger.log(lp.DEBUG, "Could NOT find valid " + \
-                                                   "protocol...")                
+                self.logger.log(lp.DEBUG, "Could NOT find valid " +
+                                "protocol...")
         else:
-            self.logger.log(lp.DEBUG, "URL is not a string, or it " + \
-                                               "is an empty string...")
+            self.logger.log(lp.DEBUG, "URL is not a string, or it " +
+                            "is an empty string...")
         return success
-    
+
     def decomposeURL(self, url=""):
         """
-        Acquire the host, port and page of the URL and return them to the 
+        Acquire the host, port and page of the URL and return them to the
         caller.
-        
+
         @parameter: url - a valid web URL, must be http:// or https://
-        
+
         @returns: host - the host to which we want to connect.
         @returns: port - the port we want to connect to
         @returns: page - the rest of the string past the host:port section
@@ -268,13 +245,13 @@ class Connectivity(object):
                 hostAndPort = urlsplit[2]
                 if re.match(".+:.+", hostAndPort):
                     #####
-                    # Get the host - check if there is a port indication in the URL, 
-                    # ie. poxyout.example.com:8888 if so, get both.
+                    # Get the host - check if there is a port indication in
+                    # the URL, ie. poxyout.example.com:8888 if so, get both.
                     hostList = hostAndPort.split(":")
                     self.logger.log(lp.DEBUG, "hostList - " + str(hostList))
                     ####
-                    # Multiple colons is invalid, so raise an exception if two or 
-                    # more are found.
+                    # Multiple colons is invalid, so raise an exception
+                    # if two or more are found.
                     if len(hostList) < 2:
                         self.host = hostList[0]
                         self.port = hostList[1]
@@ -286,20 +263,20 @@ class Connectivity(object):
                     elif re.match("^http://.+", url):
                         port = 80
                     host = hostAndPort
-                        
+
                 else:
-                    raise ConnectivityInvalidURL("Multiple colons in " + \
-                                                 " hostname portion " + \
+                    raise ConnectivityInvalidURL("Multiple colons in " +
+                                                 " hostname portion " +
                                                  "of the URL...")
                 #####
-                # Put together the "page" - or string after the 
+                # Put together the "page" - or string after the
                 # host:port section of the URL
                 try:
                     tmpstring = urlsplit[3:]
                     page = "/" + "/".join(tmpstring)
                 except IndexError, err:
                     self.logger.log(lp.DEBUG, "No page...")
-                
+
         self.logger.log(lp.DEBUG, "URL: " + str(url))
         self.logger.log(lp.DEBUG, "host: " + str(host))
         self.logger.log(lp.DEBUG, "port: " + str(port))
@@ -307,28 +284,28 @@ class Connectivity(object):
 
         return str(host), str(port), str(page)
 
-
     ###########################################################################
-    
+
     def set_no_proxy(self):
         """
-        This method described here: http://www.decalage.info/en/python/urllib2noproxy
+        This method described here:
+        http://www.decalage.info/en/python/urllib2noproxy
+
         to create a "no_proxy" environment for python
-    
+
         @author: Roy Nielsen
-    
         """
         proxy_handler = urllib2.ProxyHandler({})
         opener = urllib2.build_opener(proxy_handler)
         urllib2.install_opener(opener)
 
     ###########################################################################
-    
+
     def buildValidatingOpener(self, ca_certs, proxy=False):
         '''
         Return a urllib2 'opener' that can verify a site based on a public CA
         pem file.
-        
+
         @param: ca_certs - a Pem file that has one or more public CA certs
                            to compare a website's cert with to make sure the
                            site has a valid ancestry.
@@ -337,7 +314,7 @@ class Connectivity(object):
 
         @returns: a valid urllib2 https handler, or False, having not been able
                   to load the ssl library
-        
+
         example:
 
         >>> opener = buildValidatingOpener(resourcesDir + "/.ea.pem")
@@ -350,15 +327,15 @@ class Connectivity(object):
         >>> data = opener.open(req).read()
         >>> 
         >>> opener.close()
- 
+
         @compiler: Roy Nielsen
         '''
         url_opener = False
         try:
             import ssl
         except ImportError:
-            self.logger.log(lp.DEBUG, "SSL not found.  Not able to " +\
-                                               "a validating https opener.")
+            self.logger.log(lp.DEBUG, "SSL not found.  Not able to " +
+                            "a validating https opener.")
         else:
             class VerifiedHTTPSConnection(httplib.HTTPSConnection):
                 def connect(self):
@@ -390,9 +367,11 @@ class Connectivity(object):
 
             https_handler = VerifiedHTTPSHandler()
             if proxy:
-                url_opener = urllib2.build_opener(https_handler, urllib2.ProxyHandler({'https' : proxy}))
+                url_opener = urllib2.build_opener(https_handler,
+                                                  urllib2.ProxyHandler({'https': proxy}))
             else:
-                url_opener = urllib2.build_opener(https_handler, urllib2.ProxyHandler({}))
+                url_opener = urllib2.build_opener(https_handler,
+                                                  urllib2.ProxyHandler({}))
 
         return url_opener
     
