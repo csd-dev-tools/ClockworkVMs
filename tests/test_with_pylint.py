@@ -98,7 +98,7 @@ def pylint_test_template(*args):
     return foo
 
 
-class test_with_pylint_errors(unittest.TestCase):
+class test_with_pylint(unittest.TestCase):
     def assert_pylint_error(self, myfile, lineNum, text):
         self.assertTrue(False, myfile + ": (" + str(lineNum) + ") " + text)
 
@@ -279,9 +279,9 @@ if __name__=="__main__":
         test_name = "test_with_pylint_{0}_{1}_{2}".format("_".join("_".join(myfile.split("/")).split(".")), lineNum, "_".join("_".join(text.split(" ")).split("'")))
         #print test_name
         error_case = pylint_test_template(*specificError)
-        setattr(test_with_pylint_errors, test_name, error_case)
+        setattr(test_with_pylint, test_name, error_case)
 
-    test_suite.addTest(unittest.makeSuite(test_with_pylint_errors))
+    test_suite.addTest(unittest.makeSuite(test_with_pylint))
     runner = unittest.TextTestRunner()
     testResults  = runner.run(test_suite)  # output goes to stderr
 
@@ -296,5 +296,5 @@ else:
         test_name = "test_with_pylint_{0}_{1}_{2}".format("_".join("_".join(myfile.split("/")).split(".")), lineNum, "_".join("_".join(text.split(" ")).split("'")))
         #print test_name
         error_case = pylint_test_template(*specificError)
-        setattr(test_with_pylint_errors, test_name, error_case)
+        setattr(test_with_pylint, test_name, error_case)
 
