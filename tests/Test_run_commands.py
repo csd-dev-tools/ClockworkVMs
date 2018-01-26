@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import unittest
+import time
 import sys
 import os
 from datetime import datetime
@@ -47,10 +48,14 @@ class test_run_commands(unittest.TestCase):
         self.assertRaises(TypeError, self.rw.communicate, {})
         self.assertRaises(TypeError, self.rw.communicate, True)
 
-    def test_ExecuteValidCommand(self):
-        '''
-        '''
+    def test_setCommand(self):
+        command = ['/bin/ls', 1, '.']
+        self.assertRaises(SetCommandTypeError,
+                          self.rw.setCommand, [command])
 
+    def test_communicate(self):
+        """
+        """
         run_commands = ["/bin/ls /var/log", ['/bin/ls', '-l', '/tmp/*']]
         i = 0
 
@@ -60,42 +65,54 @@ class test_run_commands(unittest.TestCase):
             self.rw.setCommand(run_command, myshell=True)
             _, _, retval = self.rw.communicate()
             self.assertEquals(retval, 0,
-                            "Valid [" + str(i) +
-                            "] command execution failed: " + str(run_command))
+                              "Valid [" + str(i) +
+                              "] command execution failed: " +
+                              str(run_command))
             i = i + 1
-
-    def test_ExecuteInvalidCommand(self):
-        command = ['/bin/ls', 1, '.']
-        self.assertRaises(SetCommandTypeError,
-                          self.rw.setCommand, [command])
 
         self.rw.setCommand(['/bin/ls', '/1', '/'])
         _, _, retcode = self.rw.communicate()
         self.logger.log(lp.WARNING, "retcode: " + str(retcode))
         self.assertEquals(retcode, 1, "Returncode Test failed...")
-        self.rw.setCommand(['/bin/ls', '/1', '/'])
-        _, _, retcode = self.rw.waitNpassThruStdout()
-        self.assertEquals(retcode, 1, "Returncode Test failed...")
-
-    def test_communicate(self):
-        """
-        """
-        pass
 
     def test_wait(self):
         """
         """
-        pass
+        run_commands = ["/bin/ls /var/log", ['/bin/ls', '-l', '/tmp/*']]
+        i = 0
+
+        self.logger.log(lp.DEBUG, "commands: " + str(run_commands))
+        for run_command in run_commands:
+            self.logger.log(lp.DEBUG, "command: " + str(run_command))
+            self.rw.setCommand(run_command, myshell=True)
+            _, _, retval = self.rw.wait()
+            self.assertEquals(retval, 0,
+                              "Valid [" + str(i) +
+                              "] command execution failed: " +
+                              str(run_command))
+            i = i + 1
+
+        self.rw.setCommand(['/bin/ls', '/1', '/'])
+        _, _, retcode = self.rw.wait()
+        self.logger.log(lp.WARNING, "retcode: " + str(retcode))
+        self.assertEquals(retcode, 1, "Returncode Test failed...")
 
     def test_waitNpassThruStdout(self):
         """
         """
-        pass
+        self.rw.setCommand(['/bin/ls', '/1', '/'])
+        _, _, retcode = self.rw.waitNpassThruStdout()
+        self.assertEquals(retcode, 1, "Returncode Test failed...")
 
     def test_timeout(self):
         """
         """
-        pass
+        self.rw.setCommand(['/sbin/ping', '8.8.8.8'])
+        startTime = time.time()
+        self.rw.timeout(3)
+        elapsed = (time.time() - startTime)
+        self.assertTrue(elapsed < 4,
+                        "Elapsed time is greater than it should be...")
 
     def test_runAs(self):
         """
@@ -117,22 +134,12 @@ class test_run_commands(unittest.TestCase):
         """
         pass
 
-    def test_runAs(self):
-        """
-        """
-        pass
-
     def test_getecho(self):
         """
         """
         pass
 
     def test_waitnoecho(self):
-        """
-        """
-        pass
-
-    def test_runAsWithSudo(self):
         """
         """
         pass

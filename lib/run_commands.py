@@ -279,7 +279,10 @@ class RunWith(object):
                 proc.wait()
                 for line in proc.stdout.readline():
                     if line:
-                        self.output = self.output + str(line) + "\n"
+                        self.stdout = self.stdout + str(line) + "\n"
+                for line in proc.stderr.readline():
+                    if line:
+                        self.stdoerr = self.stderr + str(line) + "\n"
             except Exception, err:
                 self.logger.log(lp.WARNING, traceback.format_exc(err))
                 self.logger.log(lp.WARNING,
@@ -293,13 +296,15 @@ class RunWith(object):
                 self.logger.log(lp.DEBUG, str(self.printcmd) +
                                 " Returned with error/returncode: " +
                                 str(proc.returncode))
+                self.retcode = proc.returncode
                 proc.stdout.close()
+                proc.stderr.close()
             finally:
-                self.logger.log(lp.DEBUG,
-                                "Done with command: " + self.printcmd)
-                self.stdout = str(proc.stdout)
-                self.stderr = str(proc.stderr)
-                self.retcode = str(proc.returncode)
+                self.logger.log(lp.DEBUG, "Done with command: " +
+                                          str(self.printcmd))
+                self.logger.log(lp.DEBUG, "stdout: " + str(self.stdout))
+                self.logger.log(lp.DEBUG, "stderr: " + str(self.stderr))
+                self.logger.log(lp.DEBUG, "retcode: " + str(self.retcode))
         else:
             self.logger.log(lp.WARNING,
                             "Cannot run a command that is empty...")
