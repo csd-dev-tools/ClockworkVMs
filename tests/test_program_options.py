@@ -7,14 +7,13 @@ import re
 from collections import OrderedDict
 from operator import itemgetter
 
-appendDir = "/".join(os.path.abspath(os.path.dirname(__file__)).split('/')[:-2])
+appendDir = "/".join(os.path.abspath(os.path.dirname(__file__)).split('/')[:-1])
 print "appendDir: " + appendDir
 sys.path.append(appendDir)
-import ClockworkVMs
-from ClockworkVMs.lib.loggers import CyLogger
-from ClockworkVMs.lib.loggers import LogPriority as lp
-from ClockworkVMs.lib.run_commands import RunWith
-from ClockworkVMs.lib.program_options import ProgramOptions
+from lib.loggers import CyLogger
+from lib.loggers import LogPriority as lp
+from lib.run_commands import RunWith
+from lib.program_options import ProgramOptions
 
 
 parameter_dictionary = {str(["-p", "proxyout.lanl.gov:8080"]):{'rsyncProxy': '', 'noProxy': '', 'verbose': False, 'logPath': '/tmp/', 'proxy': 'proxyout.lanl.gov:8080', 'debug': False, 'httpProxy': '', 'repoRoot': '/opt/tools/src/boxcutter', 'ftpProxy': '', 'httpsProxy': ''},
