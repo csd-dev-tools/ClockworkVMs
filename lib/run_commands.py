@@ -296,15 +296,17 @@ class RunWith(object):
                 self.logger.log(lp.DEBUG, str(self.printcmd) +
                                 " Returned with error/returncode: " +
                                 str(proc.returncode))
-                self.retcode = proc.returncode
-                proc.stdout.close()
-                proc.stderr.close()
             finally:
+                self.stdout = str(proc.stdout)
+                self.stderr = str(proc.stderr)
+                self.retcode = proc.returncode
                 self.logger.log(lp.DEBUG, "Done with command: " +
                                           str(self.printcmd))
                 self.logger.log(lp.DEBUG, "stdout: " + str(self.stdout))
                 self.logger.log(lp.DEBUG, "stderr: " + str(self.stderr))
                 self.logger.log(lp.DEBUG, "retcode: " + str(self.retcode))
+                proc.stdout.close()
+                proc.stderr.close()
         else:
             self.logger.log(lp.WARNING,
                             "Cannot run a command that is empty...")
@@ -449,13 +451,18 @@ class RunWith(object):
                 # self.logger.log(lp.DEBUG, self.printcmd +
                 #                " Returned with error/returncode: " +
                 #                str(self.error))
-                self.retcode = str(proc.returncode)
+                pass
             finally:
                 self.stdout = str(proc.stdout)
                 self.stderr = str(proc.stderr)
                 self.retcode = proc.returncode
                 self.logger.log(lp.DEBUG, "Done with command: " +
-                                self.printcmd)
+                                          str(self.printcmd))
+                self.logger.log(lp.DEBUG, "stdout: " + str(self.stdout))
+                self.logger.log(lp.DEBUG, "stderr: " + str(self.stderr))
+                self.logger.log(lp.DEBUG, "retcode: " + str(self.retcode))
+                proc.stdout.close()
+                proc.stderr.close()
         else:
             self.logger.log(lp.WARNING,
                             "Cannot run a command that is empty...")
@@ -510,15 +517,17 @@ class RunWith(object):
                 self.logger.log(lp.WARNING, str(err))
                 raise err
             else:
-                self.retcode = proc.returncode
-                proc.stdout.close()
-                proc.stderr.close()
+                self.logger.log(lp.DEBUG, "retcode: " + str(self.retcode))
             finally:
-                self.logger.log(lp.DEBUG,
-                                "Done with command: " + self.printcmd)
+                self.stdout = str(proc.stdout)
+                self.stderr = str(proc.stderr)
+                self.retcode = proc.returncode
+                self.logger.log(lp.DEBUG, "Done with command: " +
+                                          str(self.printcmd))
                 self.logger.log(lp.DEBUG, "stdout: " + str(self.stdout))
                 self.logger.log(lp.DEBUG, "stderr: " + str(self.stderr))
-                self.logger.log(lp.DEBUG, "retcode: " + str(self.retcode))
+                proc.stdout.close()
+                proc.stderr.close()
         else:
             self.logger.log(lp.WARNING,
                             "Cannot run a command that is empty...")
@@ -527,7 +536,7 @@ class RunWith(object):
             self.retcode = None
 
         self.command = None
-        return timeout["value"]
+        return self.stdout, self.stderr, self.retcode, timeout["value"]
 
     ###########################################################################
 
@@ -611,8 +620,8 @@ class RunWith(object):
             #            "debug", message_level)
 
         self.command = None
-        return self.output, self.error, self.returncode
-        
+        return self.output, self.error, self.retcode
+
     ###########################################################################
 
     def liftDown(self, user="", target_dir=""):
