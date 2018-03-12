@@ -56,18 +56,19 @@ class test_run_commands(unittest.TestCase):
     def test_communicate(self):
         """
         """
+        self.logger.log(lp.DEBUG, "=============== Starting test_communicate...")
         run_commands = ["/bin/ls /var/log", ['/bin/ls', '-l', '/tmp/*']]
         i = 0
 
         self.logger.log(lp.DEBUG, "commands: " + str(run_commands))
-        for run_command in run_commands:
-            self.logger.log(lp.DEBUG, "command: " + str(run_command))
-            self.rw.setCommand(run_command, myshell=True)
-            _, _, retval = self.rw.communicate()
+        for command in run_commands:
+            self.logger.log(lp.DEBUG, "command: " + str(command))
+            self.rw.setCommand(command, myshell=True)
+            _, _, retval = self.rw.communicate(silent=False)
             self.assertEquals(retval, 0,
                               "Valid [" + str(i) +
                               "] command execution failed: " +
-                              str(run_command))
+                              str(command) + " --- retval: " + str(retval))
             i = i + 1
 
         self.rw.setCommand(['/bin/ls', '/1', '/'])
@@ -75,9 +76,12 @@ class test_run_commands(unittest.TestCase):
         self.logger.log(lp.WARNING, "retcode: " + str(retcode))
         self.assertEquals(retcode, 1, "Returncode Test failed...")
 
+        self.logger.log(lp.DEBUG, "=============== Ending test_communicate...")
+
     def test_wait(self):
         """
         """
+        self.logger.log(lp.DEBUG, "=============== Starting test_wait...")
         run_commands = ["/bin/ls /var/log", ['/bin/ls', '-l', '/tmp/*']]
         i = 0
 
