@@ -7,14 +7,15 @@ import sys
 import os
 from collections import OrderedDict
 
-appendDir = "/".join(os.path.abspath(os.path.dirname(__file__)).split('/')[:-2])
-#print "appendDir: " + appendDir
-sys.path.append(appendDir)
-import ClockworkVMs
-from ClockworkVMs.lib.loggers import CyLogger
-from ClockworkVMs.lib.loggers import LogPriority as lp
-from ClockworkVMs.lib.run_commands import RunWith
-from ClockworkVMs.lib.program_options import ProgramOptions
+mydir = os.path.dirname(os.path.abspath(__file__))
+parentdir = "/" + "/".join(mydir.split("/")[:-1])
+print parentdir
+sys.path.append(parentdir)
+
+from lib.loggers import CyLogger
+from lib.loggers import LogPriority as lp
+from lib.run_commands import RunWith
+from lib.program_options import ProgramOptions
 
 def acquireProgOptDict(programOptions=""):
     strippedString = programOptions.strip().strip("{").strip("}")

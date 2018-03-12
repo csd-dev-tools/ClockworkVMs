@@ -40,7 +40,7 @@ class test_program_options(unittest.TestCase):
             arg_set4 = arg_set3.strip("]")
             arg_set5 = arg_set4.split(", ")
             print str(arg_set5)
-            cmd = [appendDir + "/ClockworkVMs/tests/program_options_mock.py"] + arg_set5
+            cmd = [os.path.dirname(os.path.abspath(__file__)) + '/program_options_mock.py'] + arg_set5
             self.logger.log(lp.DEBUG, "cmd: " + str(cmd))
             self.rw.setCommand(cmd)
             output, error, retval = self.rw.communicate()
