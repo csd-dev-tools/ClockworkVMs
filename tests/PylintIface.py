@@ -79,8 +79,9 @@ class PylintIface():
         # Set up logging
         # self.logger = CyLogger(level=loglevel)
         self.logger = logger
+        self.compiledPackages = compiledPackages
         #self.logger.initializeLogs(logdir=options.logPath)
-        self.args = ["--extension-pkg-whitelist="+compiledPackages]
+        self.args = ["--extension-pkg-whitelist="+self.compiledPackages]
 
 
     @contextlib.contextmanager
