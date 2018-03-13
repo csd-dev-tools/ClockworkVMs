@@ -62,7 +62,7 @@ class test_run_commands(unittest.TestCase):
         self.logger.log(lp.DEBUG, "commands: " + str(run_commands))
         for run_command in run_commands:
             self.logger.log(lp.DEBUG, "command: " + str(run_command))
-            self.rw.setCommand(run_command, myshell=True)
+            self.rw.setCommand(run_command)
             _, _, retval = self.rw.communicate()
             self.assertEquals(retval, 0,
                               "Valid [" + str(i) +
@@ -84,7 +84,7 @@ class test_run_commands(unittest.TestCase):
         self.logger.log(lp.DEBUG, "commands: " + str(run_commands))
         for run_command in run_commands:
             self.logger.log(lp.DEBUG, "command: " + str(run_command))
-            self.rw.setCommand(run_command, myshell=True)
+            self.rw.setCommand(run_command)
             _, _, retval = self.rw.wait()
             self.assertEquals(retval, 0,
                               "Valid [" + str(i) +
@@ -107,10 +107,17 @@ class test_run_commands(unittest.TestCase):
     def test_timeout(self):
         """
         """
-        self.rw.setCommand(['/sbin/ping', '8.8.8.8'])
+        if os.path.exists("/sbin/ping"):
+            ping = "/sbin/ping"
+        elif os.path.exists('/bin/ping'):
+            ping = "/bin/ping"
+
+        self.rw.setCommand([ping, '8.8.8.8'])
+
         startTime = time.time()
         self.rw.timeout(3)
         elapsed = (time.time() - startTime)
+
         self.assertTrue(elapsed < 4,
                         "Elapsed time is greater than it should be...")
 

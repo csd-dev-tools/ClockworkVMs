@@ -239,12 +239,11 @@ class RunWith(object):
                 raise err
             else:
                 if not silent:
-                    self.logger.log(lp.DEBUG, self.printcmd)
-                    self.logger.log(lp.DEBUG, " Returned with error/returncode" +
-                                           ": " + str(proc.returncode))
-                    self.logger.log(lp.DEBUG, "stdout: " + str(proc.stdout))
-                    self.logger.log(lp.DEBUG, "stderr: " + str(proc.stderr))
+                    self.logger.log(lp.DEBUG, "Done with: " + self.printcmd)
+                self.stdout = proc.stdout
+                self.stderr = proc.stderr
                 self.retcode = proc.returncode
+                self.libc.sync()
                 proc.stdout.close()
                 proc.stderr.close()
             finally:
@@ -290,36 +289,35 @@ class RunWith(object):
                     if line:
                         self.stdoerr = self.stderr + str(line) + "\n"
             except Exception, err:
-                self.logger.log(lp.WARNING, traceback.format_exc(err))
-                self.logger.log(lp.WARNING,
-                                "system_call_retval - Unexpected Exception: " +
-                                str(err) +
-                                " command: " + str(self.printcmd))
+                self.logger.log(lp.WARNING, "- Unexpected Exception: "  + \
+                           str(err)  + " command: " + self.printcmd)
+                self.logger.log(lp.WARNING, "stderr: " + str(self.stderr))
                 self.logger.log(lp.WARNING, traceback.format_exc())
                 self.logger.log(lp.WARNING, str(err))
                 raise err
             else:
-                self.logger.log(lp.DEBUG, str(self.printcmd) +
-                                " Returned with error/returncode: " +
-                                str(proc.returncode))
-            finally:
-                self.stdout = str(proc.stdout)
-                self.stderr = str(proc.stderr)
+                if not silent:
+                    self.logger.log(lp.DEBUG, "Done with: " + self.printcmd)
+                self.stdout = proc.stdout
+                self.stderr = proc.stderr
                 self.retcode = proc.returncode
+                self.libc.sync()
+                proc.stdout.close()
+                proc.stderr.close()
+            finally:
                 if not silent:
                     self.logger.log(lp.DEBUG, "Done with command: " +
-                                     str(self.printcmd))
+                                    str(self.printcmd))
                     self.logger.log(lp.DEBUG, "stdout: " + str(self.stdout))
                     self.logger.log(lp.DEBUG, "stderr: " + str(self.stderr))
                     self.logger.log(lp.DEBUG, "retcode: " + str(self.retcode))
-                proc.stdout.close()
-                proc.stderr.close()
         else:
             self.logger.log(lp.WARNING,
                             "Cannot run a command that is empty...")
             self.stdout = None
             self.stderr = None
             self.retcode = None
+
         self.command = None
         return self.stdout, self.stderr, self.retcode
 
@@ -442,22 +440,28 @@ class RunWith(object):
                 self.libc.sync()
 
             except Exception, err:
-                trace = traceback.format_exc()
-                if not silent:
-                    self.logger.log(lp.WARNING, "- Unexpected Exception: "  + \
-                                    str(err)  + " command: " + self.printcmd)
+                self.logger.log(lp.WARNING, "- Unexpected Exception: "  + \
+                           str(err)  + " command: " + self.printcmd)
                 self.logger.log(lp.WARNING, "stderr: " + str(self.stderr))
-                self.logger.log(lp.WARNING, str(trace))
-                raise
+                self.logger.log(lp.WARNING, traceback.format_exc())
+                self.logger.log(lp.WARNING, str(err))
+                raise err
             else :
                 if not silent:
-                    self.logger.log(lp.DEBUG, self.printcmd + " Returned with error/returncode: " + str(proc.returncode))
-                    self.logger.log(lp.DEBUG, self.printcmd + " Returned with output: " + str(self.stdout))
-                    self.logger.log(lp.DEBUG, self.printcmd + " Returned with error: " + str(self.stderr))
-                    self.retcode = str(proc.returncode)
+                    self.logger.log(lp.DEBUG, "Done with: " + self.printcmd)
+                self.stdout = proc.stdout
+                self.stderr = proc.stderr
+                self.retcode = proc.returncode
+                self.libc.sync()
+                proc.stdout.close()
+                proc.stderr.close()
             finally:
                 if not silent:
-                    self.logger.log(lp.DEBUG, "Done with command: " + self.printcmd)
+                    self.logger.log(lp.DEBUG, "Done with command: " +
+                                    str(self.printcmd))
+                    self.logger.log(lp.DEBUG, "stdout: " + str(self.stdout))
+                    self.logger.log(lp.DEBUG, "stderr: " + str(self.stderr))
+                    self.logger.log(lp.DEBUG, "retcode: " + str(self.retcode))
         else :
             self.logger.log(lp.WARNING, "Cannot run a command that is empty...")
             self.stdout = None
@@ -480,7 +484,7 @@ class RunWith(object):
 
     ###########################################################################
 
-    def timeout(self, timout_sec):
+    def timeout(self, timout_sec, silent=True):
         """
         Run a command with a timeout - return:
         Returncode of the process
@@ -504,24 +508,28 @@ class RunWith(object):
                 timer.cancel()
                 self.retcode = proc.returncode
             except Exception, err:
-                self.logger.log(lp.WARNING,
-                                "system_call_retval - Unexpected " +
-                                "Exception: " + str(err))
-                self.logger.log(lp.DEBUG, traceback.format_exc())
+                self.logger.log(lp.WARNING, "- Unexpected Exception: "  + \
+                           str(err)  + " command: " + self.printcmd)
+                self.logger.log(lp.WARNING, "stderr: " + str(self.stderr))
+                self.logger.log(lp.WARNING, traceback.format_exc())
+                self.logger.log(lp.WARNING, str(err))
                 raise err
             else:
-                self.logger.log(lp.DEBUG, "retcode: " + str(self.retcode))
-            finally:
-                self.stdout = str(proc.stdout)
-                self.stderr = str(proc.stderr)
-                self.retcode = proc.returncode
                 if not silent:
-                    self.logger.log(lp.DEBUG, "Done with command: " +
-                                              str(self.printcmd))
-                self.logger.log(lp.DEBUG, "stdout: " + str(self.stdout))
-                self.logger.log(lp.DEBUG, "stderr: " + str(self.stderr))
+                    self.logger.log(lp.DEBUG, "Done with: " + self.printcmd)
+                self.stdout = proc.stdout
+                self.stderr = proc.stderr
+                self.retcode = proc.returncode
+                self.libc.sync()
                 proc.stdout.close()
                 proc.stderr.close()
+            finally:
+                if not silent:
+                    self.logger.log(lp.DEBUG, "Done with command: " +
+                                    str(self.printcmd))
+                    self.logger.log(lp.DEBUG, "stdout: " + str(self.stdout))
+                    self.logger.log(lp.DEBUG, "stderr: " + str(self.stderr))
+                    self.logger.log(lp.DEBUG, "retcode: " + str(self.retcode))
         else:
             self.logger.log(lp.WARNING,
                             "Cannot run a command that is empty...")
@@ -602,7 +610,9 @@ class RunWith(object):
                         break
                 os.close(master)
                 os.close(slave)
+                self.libc.sync()
                 proc.wait()
+                self.libc.sync()
                 self.stdout = proc.stdout
                 self.stderr = proc.stderr
                 self.retcode = proc.returncode
@@ -610,7 +620,6 @@ class RunWith(object):
                 self.stdout = None
                 self.stderr = None
                 self.retcode = None
-            output = output.strip()
             if not silent:
                 self.logger.log(lp.DEBUG, "retcode: " + str(self.stdout))
                 self.logger.log(lp.DEBUG, "retcode: " + str(self.stderr))
@@ -634,15 +643,17 @@ class RunWith(object):
         self.stdout = ""
         self.stderr = ""
         self.retcode = 999
-        if target_dir:
-            return_dir = os.getcwd()
-            os.chdir(target_dir)
-
         user = user.strip()
 
         if os.getuid() != 0:
             self.logger.log("This can only run if running in privileged mode.")
             return 256
+
+        if isinstance(target_dir, basestring) and target_dir:
+            return_dir = os.getcwd()
+            if os.path.exists(target_dir):
+                os.chdir(target_dir)
+
         if re.match("^\s*$", user) or not self.command:
             self.logger.log(lp.WARNING, "Cannot pass in empty parameters...")
             self.logger.log(lp.WARNING, "user = " + str(user))
@@ -843,7 +854,9 @@ class RunWith(object):
                         # print output.strip()
                     os.close(master)
                     os.close(slave)
+                    self.libc.sync()
                     proc.wait()
+                    self.libc.sync()
                     self.stdout = proc.stdout
                     self.stderr = proc.stderr
                     self.retcode = proc.returncode
@@ -939,7 +952,9 @@ class RunWith(object):
                         # print output.strip()
                     os.close(master)
                     os.close(slave)
+                    self.libc.sync()
                     proc.wait()
+                    self.libc.sync()
                     self.stdout = output
                     self.stderr = proc.stderr
                     self.retcode = proc.returncode
