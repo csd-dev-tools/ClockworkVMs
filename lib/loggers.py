@@ -12,6 +12,7 @@ https://docs.python.org/2/library/multiprocessing.html?highlight=logging#logging
 
 @author: Roy Nielsen
 """
+from __future__ import absolute_import
 import os
 import re
 import sys

@@ -41,8 +41,6 @@ import plistlib as pl
 from glob import glob
 from subprocess import Popen, STDOUT, PIPE
 
-sys.path.append("/usr/local/lib/python2.7/site-packages/PyInstaller.egg")
-
 from PyInstaller.building import makespec, build_main
 
 sys.path.append('./ramdisk')
@@ -52,6 +50,13 @@ from ramdisk.lib.manage_user.manage_user import ManageUser
 from ramdisk.lib.manage_keychain.manage_keychain import ManageKeychain
 from ramdisk.lib.run_commands import RunWith
 
+
+def BadBuildError(Exception):
+    """
+    Custom Exception
+    """
+    def __init__(self, *args, **kwargs):
+        Exception.__init__(self, *args, **kwargs)
 
 class MacBuildLib(object):
     def __init__(self, logger, pypaths=None):
@@ -151,13 +156,15 @@ class MacBuildLib(object):
                                      pathex=pathex, specpath=specpath, 
                                      hiddenmports=hiddenImports,
                                      runtime_hooks=runtime_hooks,
-                                     bundle_identifier=bundle_identifier)
+                                     bundle_identifier=bundle_identifier,
+                                     excludes=["PyQt4"])
             else:
                 return makespec.main(scripts, noupx=noupx, strip=strip,
                                      console=console, icon_file=icon_file,
                                      pathex=pathex, hiddenimports=hiddenImports,
                                      runtime_hooks=runtime_hooks,
-                                     bundle_identifier=bundle_identifier)
+                                     bundle_identifier=bundle_identifier,
+                                     excludes=["PyQt4"])
         except Exception:
             raise
 
@@ -280,6 +287,37 @@ class MacBuildLib(object):
             pl.writePlist(mypl, targetFile)
         except Exception:
             raise
+
+    def changeViewControllerTitle(self, titleString=""):
+        '''
+        Change the window title string in the ViewController.swift file
+
+        @param: titleString - the string to use for the window title.
+
+        @note: Window title string should be something like "stonix4mac 0.9.14.2"
+               where 0.9.14.2 is the build version for stonix.
+
+        @author: Roy Nielsen
+        '''
+        success = False
+        try:
+            with open("stonix4mac/stonix4mac/ViewController.swift") as viewController:
+                fileContent = viewController.readlines()
+                viewController.close()
+            newFileContent = []
+            for line in fileContent:
+                if re.search("self\.view\.window\?\.title", line):
+                    line = re.sub("\s+self\.view\.window\?\.title\s*=\s*.*$", "        self.view.window?.title = \"" + str(titleString) + "\"", line)
+                    self.logger.log(lp.DEBUG, "Wrote title to line: \"" + str(line) + "\"")
+                newFileContent.append(line)
+
+            with open("stonix4mac/stonix4mac/ViewController.swift", "w") as viewController:
+                for line in newFileContent:
+                    viewController.write(line)
+                viewController.close()
+        except Exception, err:
+            message = "error attempting to fix title..." + traceback.format_exc()
+            self.logger.log(lp.DEBUG, message)
 
     def getHiddenImports(self, buildRoot='', treeRoot=''):
         '''
@@ -437,17 +475,15 @@ class MacBuildLib(object):
             cmd = ['/usr/bin/codesign']
             options = []
             if verbose:
-                re.sub("\s+", "", verbose)
-                cmd += ['-' + verbose.rstrip()]
+                cmd += ['-' + verbose]
             if deep:
                 cmd += ['--deep']
-            cmd += ['-f', '-s', "\\'" + sig + "\\'", '--keychain', signingKeychain, parentDirOfItemToSign + "/" + itemName]
-            self.logger.log(lp.DEBUG, "cmd: " + str(cmd))
+            cmd += ['-f', '-s', sig, '--keychain', signingKeychain, itemName]
             self.rw.setCommand(cmd)
 
             #####
             # Check the UID and run the command appropriately
-            output, error, retcode = self.rw.communicate()
+            output, error, retcode = self.rw.waitNpassThruStdout()
 
             #####
             # Return to the working directory
@@ -610,6 +646,8 @@ class MacBuildLib(object):
         
         if not error:
             success = True
+        else:
+            raise BadBuildError("Error building program: " + str(retcode))
         
         for line in output.split("\n"):
             self.logger.log(lp.DEBUG, str(line))
@@ -643,4 +681,84 @@ class MacBuildLib(object):
         self.logger.log(lp.DEBUG, "stdout: " + str(stdout))
         self.logger.log(lp.DEBUG, "stderr: " + str(stderr))
         self.logger.log(lp.DEBUG, "///////")
+
+    def writeInit(self, pathToDir):
+        '''
+        Create an __init__.py file, based on all the files in that directory
+
+        @param: pathToDir - path to a directory to process
+
+        @return: success - whether or not this process was a success
+
+        @author: Roy Nielsen
+        '''
+        success = False
+        header = '''###############################################################################
+#                                                                             #
+# Copyright 2015.  Los Alamos National Security, LLC. This material was       #
+# produced under U.S. Government contract DE-AC52-06NA25396 for Los Alamos    #
+# National Laboratory (LANL), which is operated by Los Alamos National        #
+# Security, LLC for the U.S. Department of Energy. The U.S. Government has    #
+# rights to use, reproduce, and distribute this software.  NEITHER THE        #
+# GOVERNMENT NOR LOS ALAMOS NATIONAL SECURITY, LLC MAKES ANY WARRANTY,        #
+# EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS SOFTWARE.  #
+# If software is modified to produce derivative works, such modified software #
+# should be clearly marked, so as not to confuse it with the version          #
+# available from LANL.                                                        #
+#                                                                             #
+# Additionally, this program is free software; you can redistribute it and/or #
+# modify it under the terms of the GNU General Public License as published by #
+# the Free Software Foundation; either version 2 of the License, or (at your  #
+# option) any later version. Accordingly, this program is distributed in the  #
+# hope that it will be useful, but WITHOUT ANY WARRANTY; without even the     #
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.    #
+# See the GNU General Public License for more details.                        #
+#                                                                             #
+###############################################################################
+'''
+
+        if self.isSaneFilePath(pathToDir):
+            rulesList = []
+        
+            allFilesList = os.listdir(pathToDir)
+        
+            for rule in allFilesList:
+                if re.search("\.py$", rule) and not re.match("__init__\.py", rule):
+                    ruleClass = re.sub("\.py$", "", rule)
+                    rulesList.append(ruleClass)
+        
+            try:
+                initPath = os.path.join(pathToDir, "__init__.py")
+                self.logger.log(lp.DEBUG, "initPath: " + str(initPath))
+                fp = open(initPath, 'w')
+                fp.write(header)
+                for rule in rulesList:
+                    fp.write("import " + rule + "\n")
+                fp.write("\n")
+            except OSError, err:
+                trace = traceback.format_exc() 
+                self.logger.log(lp.DEBUG, "Traceback: " + trace)
+                raise err
+            else:
+                success = True
+                self.logger.log(lp.DEBUG, "Done writing init.")
+            finally:
+                try:
+                    fp.close()
+                except:
+                    pass
+
+        return success
+
+    def isSaneFilePath(self, filepath):
+        """
+        Check for a good file path in the passed in string.
+
+        @author: Roy Nielsen
+        """
+        sane = False
+        if isinstance(filepath, basestring):
+            if re.match("^[A-Za-z/][A-Za-z0-9\.\-_/]*", filepath):
+                sane = True
+        return sane
 
