@@ -37,6 +37,7 @@ class test_run_commands(unittest.TestCase):
         pass
 
     def test_RunCommunicateWithBlankCommand(self):
+        self.rw.__init__(self.logger)
         self.assertRaises(SetCommandTypeError, self.rw.setCommand, "")
         self.assertRaises(SetCommandTypeError, self.rw.setCommand, [])
         self.assertRaises(SetCommandTypeError, self.rw.setCommand, None)
@@ -44,6 +45,7 @@ class test_run_commands(unittest.TestCase):
         self.assertRaises(SetCommandTypeError, self.rw.setCommand, {})
 
     def test_setCommand(self):
+        self.rw.__init__(self.logger)
         command = ['/bin/ls', 1, '.']
         self.assertRaises(SetCommandTypeError,
                           self.rw.setCommand, [command])
@@ -51,54 +53,52 @@ class test_run_commands(unittest.TestCase):
     def test_communicate(self):
         """
         """
+        self.rw.__init__(self.logger)
         self.logger.log(lp.DEBUG, "=============== Starting test_communicate...")
-        run_commands = ["/bin/ls /var/log/", ['/bin/ls', '-l', '/tmp/*']]
-        i = 0
 
-        self.logger.log(lp.DEBUG, "commands: " + str(run_commands))
-        for command in run_commands:
-            self.logger.log(lp.DEBUG, "command: " + str(command))
-            self.rw.setCommand(command)
-            _, _, retval = self.rw.communicate(silent=False)
-            self.assertEquals(retval, 0,
-                              "Valid [" + str(i) +
-                              "] command execution failed: " +
-                              str(command) + " --- retval: " + str(retval))
-            i = i + 1
-
-        self.rw.setCommand(['/bin/ls', '/1', '/'])
-        _, _, retcode = self.rw.communicate()
-        self.logger.log(lp.WARNING, "retcode: " + str(retcode))
-        self.assertEquals(retcode, 1, "Returncode Test failed...")
+        self.rw.setCommand('/bin/ls /var/spool', myshell=True)
+        _, _, retval = self.rw.communicate(silent=False)
+        self.assertEquals(retval, 0,
+                          "Valid [] command execution failed: " +
+                          '/bin/ls /var/spool --- retval: ' + str(retval))
+        self.rw.setCommand(['/bin/ls', '-l', '/usr/local'])
+        _, _, retval = self.rw.communicate(silent=False)
+        self.assertEquals(retval, 0,
+                          "Valid [] command execution failed: " +
+                          '/bin/ls /var/spool --- retval: ' + str(retval))
 
         self.logger.log(lp.DEBUG, "=============== Ending test_communicate...")
 
     def test_wait(self):
         """
         """
+        self.rw.__init__(self.logger)
         self.logger.log(lp.DEBUG, "=============== Starting test_wait...")
-        run_commands = ["/bin/ls /var/log", ['/bin/ls', '-l', '/tmp/*']]
-        i = 0
 
-        self.logger.log(lp.DEBUG, "commands: " + str(run_commands))
-        for run_command in run_commands:
-            self.logger.log(lp.DEBUG, "command: " + str(run_command))
-            self.rw.setCommand(run_command)
-            _, _, retval = self.rw.wait(silent=False)
-            self.assertEquals(retval, 0,
-                              "Valid [" + str(i) +
-                              "] command execution failed: " +
-                              str(run_command))
-            i = i + 1
+        self.rw.setCommand('/bin/ls /var/spool')
+        _, _, retval = self.rw.communicate(silent=False)
+        self.assertEquals(retval, 0,
+                          "Valid [] command execution failed: " +
+                          '/bin/ls /var/spool --- retval: ' + str(retval))
+        self.rw.setCommand(['/bin/ls', '-l', '/usr/local'])
+        _, _, retval = self.rw.communicate(silent=False)
+        self.assertEquals(retval, 0,
+                          "Valid [] command execution failed: " +
+                          '/bin/ls /var/spool --- retval: ' + str(retval))
+
 
         self.rw.setCommand(['/bin/ls', '/1', '/'])
         _, _, retcode = self.rw.wait()
         self.logger.log(lp.WARNING, "retcode: " + str(retcode))
-        self.assertEquals(retcode, 1, "Returncode Test failed...")
+        if sys.platform == 'darwin':
+            self.assertEquals(retcode, 1, "Returncode Test failed...")
+        else:
+            self.assertEquals(retcode, 2, "Returncode Test failed...")
 
     def test_waitNpassThruStdout(self):
         """
         """
+        self.rw.__init__(self.logger)
         self.rw.setCommand(['/bin/ls', '/1', '/'])
         _, _, retcode = self.rw.waitNpassThruStdout()
         if sys.platform is 'darwin':
@@ -109,6 +109,7 @@ class test_run_commands(unittest.TestCase):
     def test_timeout(self):
         """
         """
+        self.rw.__init__(self.logger)
         if os.path.exists("/sbin/ping"):
             ping = "/sbin/ping"
         elif os.path.exists('/bin/ping'):

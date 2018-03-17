@@ -85,52 +85,41 @@ class RunWith(object):
         self.retcode = None
         self.module_version = '20160224.184019.673753'
         self.printcmd = None
-        self.myshell = False
+        self.myshell = None
         self.prompt = ""
         self.environ = None
-        self.cfds = False
+        self.cfds = None
         #####
         # setting up to call ctypes to do a filesystem sync
         self.libc = getLibc()
 
-    def setCommand(self, command, env=None, myshell=False, close_fds=False):
+    def setCommand(self, command, env=None, myshell=None, close_fds=None):
         """
         initialize a command to run
 
         @author: Roy Nielsen
         """
-        if command and (isinstance(command, basestring) or isinstance(command, list)):
-            self.command = command
-        else:
-            raise SetCommandTypeError("Cannot work with an empty list!")
         #####
         # Handle Popen's shell, or "myshell"...
-        if isinstance(command, list):
-            if not command:
-                raise SetCommandTypeError("Cannot work with an empty list!")
+        if command and isinstance(command, list):
             try:
                 self.printcmd = " ".join(command)
                 self.command = command
-                if myshell is True:
-                    myshell = True
-                else:
+                if myshell is None or not isinstance(myshell, bool):
                     self.myshell = False
+                else:
+                    self.myshell = myshell
             except TypeError:
                 raise SetCommandTypeError("Can only be passed a command " +
                                           "string or a list only containing " +
                                           "string elements for a command.")
-        elif isinstance(command, basestring):
-            if not command:
-                raise SetCommandTypeError("Cannot work with an empty string!")
+        elif command and isinstance(command, basestring):
             self.command = command
             self.printcmd = command
-            myshell = False
-            '''
-            if myshell is True:
-                myshell = True
+            if myshell is None or not isinstance(myshell, bool):
+                self.myshell = True
             else:
-                self.myshell = False
-            '''
+                self.myshell = myshell
         else:
             raise SetCommandTypeError("Command cannot be this type: " +
                             str(type(command)))
@@ -141,10 +130,11 @@ class RunWith(object):
             self.environ = env
         else:
             self.environ = None
-        if close_fds and isinstance(close_fds, bool):
-            self.cfds = close_fds
-        else:
+
+        if close_fds is None or not isinstance(close_fds, bool):
             self.cfds = False
+        else:
+            self.cfds = close_fds
 
     ###########################################################################
 
@@ -235,14 +225,14 @@ class RunWith(object):
         self.retcode = 999
         if self.command and isinstance(silent, bool):
             try:
-                proc = Popen(self.command, stdout=PIPE, stderr=PIPE,
-                             shell=self.myshell,
-                             env=self.environ,
-                             close_fds=self.cfds)
+                proc = Popen(self.command, stdout=PIPE, stderr=PIPE, shell=self.myshell, env=self.environ, close_fds=self.cfds)
                 self.stdout, self.stderr = proc.communicate()
             except Exception, err:
                 if not silent:
                     self.logger.log(lp.WARNING, "command: " + str(self.printcmd))
+                    self.logger.log(lp.DEBUG, "stdout: " + str(self.stdout))
+                    self.logger.log(lp.DEBUG, "stderr: " + str(self.stderr))
+                    self.logger.log(lp.DEBUG, "retcode: " + str(self.retcode))
                 self.logger.log(lp.WARNING, "stderr: " + str(self.stderr))
                 self.logger.log(lp.WARNING, traceback.format_exc())
                 self.logger.log(lp.WARNING, str(err))
@@ -255,13 +245,16 @@ class RunWith(object):
                 self.stderr = proc.stderr
                 self.retcode = proc.returncode
                 self.libc.sync()
-                proc.stdout.close()
-                proc.stderr.close()
-            #####
-            # Lines below could reveal a password if it is passed as an
-            # argument to the command.  Could reveal in whatever stream
-            # the logger is set to log (syslog, console, etc, etc.
+                try:
+                    proc.stdout.close()
+                    proc.stderr.close()
+                except:
+                    pass
             finally:
+                #####
+                # Lines below could reveal a password if it is passed as an
+                # argument to the command.  Could reveal in whatever stream
+                # the logger is set to log (syslog, console, etc, etc.
                 if not silent:
                     self.logger.log(lp.DEBUG, "Done with command: " + self.printcmd)
                     self.logger.log(lp.DEBUG, "stdout: " + str(self.stdout))
@@ -715,11 +708,11 @@ class RunWith(object):
         self.setCommand(internal_command)
         self.stdout, self.stderr, self.retcode = self.communicate()
         if not silent:
-            for line in output.split('\n'):
+            for line in self.stdout.split('\n'):
                 self.logger.log(lp.DEBUG, "out: " + str(line))
-            for line in error.split('\n'):
+            for line in self.err.split('\n'):
                 self.logger.log(lp.DEBUG, "err: " + str(line))
-            self.logger.log(lp.DEBUG, "out: " + str(returncode))
+            self.logger.log(lp.DEBUG, "out: " + str(self.retcode))
 
         if target_dir:
             os.chdir(return_dir)
