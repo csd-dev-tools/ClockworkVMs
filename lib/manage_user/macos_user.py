@@ -607,9 +607,9 @@ class MacOSUser(ManageUserTemplate):
             if not retcode:
                 authenticated = True
 
-        #self.logger.log(lp.DEBUG, "output: " + str(output))
-        #self.logger.log(lp.DEBUG, "error: " + str(error))
-        #self.logger.log(lp.DEBUG, "retcode: " + str(retcode))
+        # self.logger.log(lp.DEBUG, "output: " + str(output))
+        # self.logger.log(lp.DEBUG, "error: " + str(error))
+        # self.logger.log(lp.DEBUG, "retcode: " + str(retcode))
         self.logger.log(lp.DEBUG, "authenticated: " + str(authenticated))
         return authenticated
 
