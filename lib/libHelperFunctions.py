@@ -245,6 +245,24 @@ def removeFdeUser(myusername=""):
 
 ############################################################################
 
+def touch(filename=""):
+    """
+    Python implementation of the touch command..
+    
+    """
+    if re.match("^\s*$", filename) :
+        logger.log(lp.INFO, "Cannot touch a file without a filename....")
+    else :
+        try:
+            os.utime(filename, None)
+        except:
+            try :
+                open(filename, 'a').close()
+            except Exception, err :
+                logger.log(lp.INFO, "Cannot open to touch: " + str(filename))
+
+###########################################################################
+
 def getecho (fileDescriptor):
     """This returns the terminal echo mode. This returns True if echo is
     on or False if echo is off. Child applications that are expecting you
