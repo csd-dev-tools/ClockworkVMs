@@ -45,9 +45,9 @@ class test_addUserToGroup(unittest.TestCase):
         # Start timer in miliseconds
         self.test_start_time = datetime.now()
         self.logger = CyLogger()
-        
-        self.manage_user = MacOSUser()
-        
+
+        self.manage_user = MacOSUser(logDispatcher=self.logger)
+
     ##################################
 
     def setUp(self):
@@ -59,7 +59,7 @@ class test_addUserToGroup(unittest.TestCase):
         pass
 
 ###############################################################################
-##### Method Tests
+# #### Method Tests
 
     ##################################
 
@@ -98,13 +98,14 @@ class test_addUserToGroup(unittest.TestCase):
         # Calculate and log how long it took...
         test_time = (test_end_time - self.test_start_time)
 
-        self.logger.log(lp.INFO, self.__module__ + " took " + str(test_time) + " time to complete...")
+        self.logger.log(lp.INFO, self.__module__ + " took " +
+                        str(test_time) + " time to complete...")
 
 ###############################################################################
 
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
+    # import sys;sys.argv = ['', 'Test.testName']
     logger = CyLogger()
     logger.initializeLogs()
     unittest.main()

@@ -92,7 +92,7 @@ class CyLogger(object):
     
     instanciatedLoggers = {}
 
-    def __init__(self, environ=False, debug_mode=False, verbose_mode=False, level=30, *args, **kwargs):
+    def __init__(self, environ=False, debug_mode=False, verbose_mode=False, level=30):
         """
         """
         #print ".............Level: " + str(level)
@@ -123,7 +123,6 @@ class CyLogger(object):
             self.validateLevel(self.lvl)
         else:
             self.lvl = 30
-        self.lvl = 5
 
         self.filename = ""
         self.syslog = False

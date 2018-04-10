@@ -40,21 +40,21 @@ class ManageUser(object):
         else:
             raise UnsupportedOSError("This operating system is not supported...")
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
     # helper Methods
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
     def getSpecificManager(self):
         """
         Getter to acqure the specific keychain manager
         """
         return self.userMgr
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def __calledBy(self):
         """
         Log the caller of the method that calls this method
-        
+
         @author: Roy Nielsen
         """
         try:
@@ -66,18 +66,18 @@ class ManageUser(object):
             self.logger.log(lp.WARNING, str(err))
             raise err
         else:
-            self.logger.log(lp.DEBUG, "called by: " + \
-                                      filename + ": " + \
-                                      functionName + " (" + \
+            self.logger.log(lp.DEBUG, "called by: " +
+                                      filename + ": " +
+                                      functionName + " (" +
                                       lineNumber + ")")
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
     # Defined Interface methods
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
     # Getters
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def findUniqueUid(self):
         """
@@ -86,7 +86,6 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -96,10 +95,11 @@ class ManageUser(object):
         success = self.userMgr.findUniqueUid()
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def uidTaken(self, uid):
         """
@@ -107,7 +107,6 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -117,16 +116,16 @@ class ManageUser(object):
         success = self.userMgr.uidTaken(uid)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def getUser(self, userName=""):
         """
         Get information about the passed in user.
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -136,16 +135,16 @@ class ManageUser(object):
         success = self.userMgr.getUser(userName)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def getUserProperties(self, userName=""):
         """
         Get information about the passed in user.
         """
-        success = False
         properties = {}
         #####
         # Preprocess logging
@@ -157,7 +156,7 @@ class ManageUser(object):
         #####
         # Postprocess logging
         self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
-        return success, properties
+        return properties
 
     #----------------------------------------------------------------------
 
@@ -165,7 +164,6 @@ class ManageUser(object):
         """
         Retrieve the passed in user's shell.
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -175,16 +173,16 @@ class ManageUser(object):
         success = self.userMgr.getUserShell(userName)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def getUserComment(self, userName=""):
         """
         Retrieve the passed in user's "user comment", or real name.
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -194,16 +192,16 @@ class ManageUser(object):
         success = self.userMgr.getUserComment(userName)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def getUserUid(self, userName=""):
         """
         Retrieve the passed in user's UID.
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -213,16 +211,16 @@ class ManageUser(object):
         success = self.userMgr.getUserUid(userName)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def getUserPriGid(self, userName=""):
         """
         Retrieve the passed in user's primary GID
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -232,16 +230,16 @@ class ManageUser(object):
         success = self.userMgr.getUserPriGid(userName)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def getUserHomeDir(self, userName=""):
         """
         Retrieve the passed in user's home directory
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -251,10 +249,11 @@ class ManageUser(object):
         success = self.userMgr.getUserHomeDir(userName)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def isUserInstalled(self, user=""):
         """
@@ -262,7 +261,6 @@ class ManageUser(object):
 
         @author Roy Nielsen
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -272,10 +270,11 @@ class ManageUser(object):
         success = self.userMgr.isUserInstalled(user)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def isUserInGroup(self, userName="", groupName=""):
         """
@@ -283,7 +282,6 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -293,18 +291,19 @@ class ManageUser(object):
         success = self.userMgr.isUserInGroup(userName, groupName)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def isUserInSudoers(self, userName=""):
         """
-        Check if this user is in the sudoers file - requires root access to run.
+        Check if this user is in the sudoers file - requires root access to
+        run.
 
         @author: Roy Nielsen
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -314,10 +313,11 @@ class ManageUser(object):
         success = self.userMgr.isUserInSudoers(userName)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def validateUser(self, userName=False, userShell=False, userComment=False,
                      userUid=False, userPriGid=False, userHomeDir=False):
@@ -327,7 +327,6 @@ class ManageUser(object):
 
         @author:
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -338,19 +337,20 @@ class ManageUser(object):
                                            userUid, userPriGid, userHomeDir)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def isQualifiedLiftAttendant(self, userName=""):
         """
-        Check if this user is in the sudoers file - requires root access to run.
+        Check if this user is in the sudoers file - requires root access to
+        run.
 
         @author: Roy Nielsen
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -360,12 +360,13 @@ class ManageUser(object):
         success = self.userMgr.isQualifiedLiftAttendant(userName)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
     # Setters
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def createStandardUser(self, userName, password):
         """
@@ -379,7 +380,6 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -389,21 +389,20 @@ class ManageUser(object):
         success = self.userMgr.createStandardUser(userName, password)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    
     def createBasicUser(self, userName=""):
         """
-        Create a username with just a moniker.  Allow the system to take care of
-        the rest.
+        Create a username with just a moniker.  Allow the system to take care
+        of the rest.
 
         Only allow usernames with letters and numbers.
         (see ParentManageUser regex for allowable characters)
 
         @author: Roy Nielsen
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -413,15 +412,16 @@ class ManageUser(object):
         success = self.userMgr.createBasicUser(userName)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def setUserName(self, user):
         """
         Setter for the class variable userName
-        
+
         @author: Roy Nielsen
         """
         success = False
@@ -429,7 +429,7 @@ class ManageUser(object):
             success = self.userMgr.setUserName(user)
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def setUserShell(self, user="", shell=""):
         """
@@ -439,7 +439,6 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -449,10 +448,11 @@ class ManageUser(object):
         success = self.userMgr.setUserShell(user, shell)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def setUserComment(self, user="", comment=""):
         """
@@ -462,7 +462,6 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -472,10 +471,11 @@ class ManageUser(object):
         success = self.userMgr.setUserComment(user, comment)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def setUserUid(self, user="", uid=""):
         """
@@ -483,7 +483,6 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -493,10 +492,11 @@ class ManageUser(object):
         success = self.userMgr.setUserUid(user, uid)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def setUserPriGid(self, user="", priGid=""):
         """
@@ -504,7 +504,6 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -514,10 +513,11 @@ class ManageUser(object):
         success = self.userMgr.setUserPriGid(user, priGid)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def setUserHomeDir(self, user="", userHome=""):
         """
@@ -527,20 +527,20 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
         self.__calledBy()
         #####
         # Call factory created object's mirror method
-        success = self.userMgr.setUserHomeDir(user, userHome)
+        success = self.userMgr.setUserHomeDir(user)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def createHomeDirectory(self, user=""):
         """
@@ -551,7 +551,6 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -561,10 +560,11 @@ class ManageUser(object):
         success = self.userMgr.createHomeDirectory(user)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def addUserToGroup(self, user="", group=""):
         """
@@ -572,7 +572,6 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -582,10 +581,11 @@ class ManageUser(object):
         success = self.userMgr.addUserToGroup(user, group)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def setUserPassword(self, user="", password="", oldPassword=""):
         """
@@ -593,7 +593,6 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -603,10 +602,11 @@ class ManageUser(object):
         success = self.userMgr.setUserPassword(user, password, oldPassword)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def rmUser(self, user=""):
         """
@@ -614,7 +614,6 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -624,10 +623,11 @@ class ManageUser(object):
         success = self.userMgr.rmUser(user)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def rmUserHome(self, user=""):
         """
@@ -637,7 +637,6 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -647,10 +646,11 @@ class ManageUser(object):
         success = self.userMgr.rmUserHome(user)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def rmUserFromGroup(self, user="", group=""):
         """
@@ -658,7 +658,6 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -668,10 +667,11 @@ class ManageUser(object):
         success = self.userMgr.rmUserFromGroup(user, group)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def fixUserHome(self, userName=""):
         """
@@ -681,7 +681,6 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -691,15 +690,15 @@ class ManageUser(object):
         success = self.userMgr.fixUserHome(userName)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def authenticate(self, user="", password=""):
         """
         """
-        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -709,5 +708,6 @@ class ManageUser(object):
         success = self.userMgr.authenticate(user, password)
         #####
         # Postprocess logging
-        self.logger.log(lp.DEBUG, "processing complete with success: " + str(success))
+        self.logger.log(lp.DEBUG, "processing complete with success: " +
+                        str(success))
         return success

@@ -250,8 +250,10 @@ class RunWith(object):
                 # the logger is set to log (syslog, console, etc, etc.
                 if not silent:
                     self.logger.log(lp.DEBUG, "Done with command: " + self.printcmd)
-                    self.logger.log(lp.DEBUG, "stdout: " + str(self.stdout))
-                    self.logger.log(lp.DEBUG, "stderr: " + str(self.stderr))
+                    for line in self.stdout.split("\n"):
+                        self.logger.log(lp.DEBUG, "stdout: " + str(line))
+                    for line in self.stderr.split("\n"):
+                        self.logger.log(lp.DEBUG, "stderr: " + str(line))
                     self.logger.log(lp.DEBUG, "retcode: " + str(self.retcode))
         else:
             self.logger.log(lp.WARNING,
@@ -308,8 +310,10 @@ class RunWith(object):
             finally:
                 if not silent:
                     self.logger.log(lp.DEBUG, "Done with command: " + self.printcmd)
-                    self.logger.log(lp.DEBUG, "stdout: " + str(self.stdout))
-                    self.logger.log(lp.DEBUG, "stderr: " + str(self.stderr))
+                    for line in self.stdout.split("\n"):
+                        self.logger.log(lp.DEBUG, "stdout: " + str(line))
+                    for line in self.stderr.split("\n"):
+                        self.logger.log(lp.DEBUG, "stderr: " + str(line))
                     self.logger.log(lp.DEBUG, "retcode: " + str(self.retcode))
         else:
             self.logger.log(lp.WARNING,
@@ -349,7 +353,8 @@ class RunWith(object):
                         tmpline = myout.strip()
                         self.stdout += tmpline + "\n"
 
-                        if tmpline and not silent:
+                        # if tmpline and not silent:
+                        if tmpline:
                             self.logger.log(lp.DEBUG, str(tmpline))
 
                         if isinstance(chk_string, str):
@@ -395,7 +400,8 @@ class RunWith(object):
                         tmpline = myerr.strip()
                         self.stderr += tmpline + "\n"
 
-                        if tmpline and not silent:
+                        # if tmpline and not silent:
+                        if tmpline:
                             self.logger.log(lp.DEBUG, str(tmpline))
 
                         if isinstance(chk_string, str):
@@ -454,8 +460,10 @@ class RunWith(object):
                 self.retcode = proc.returncode
                 if not silent:
                     self.logger.log(lp.DEBUG, "Done with command: " + self.printcmd)
-                self.logger.log(lp.DEBUG, "stdout: " + str(self.stdout))
-                self.logger.log(lp.DEBUG, "stderr: " + str(self.stderr))
+                for line in self.stdout.split("\n"):
+                    self.logger.log(lp.DEBUG, "stdout: " + str(line))
+                for line in self.stderr.split("\n"):
+                    self.logger.log(lp.DEBUG, "stderr: " + str(line))
                 self.logger.log(lp.DEBUG, "retcode: " + str(self.retcode))
         else:
             self.logger.log(lp.WARNING,
@@ -697,7 +705,7 @@ class RunWith(object):
         if not silent:
             for line in self.stdout.split('\n'):
                 self.logger.log(lp.DEBUG, "out: " + str(line))
-            for line in self.err.split('\n'):
+            for line in self.stderr.split('\n'):
                 self.logger.log(lp.DEBUG, "err: " + str(line))
             self.logger.log(lp.DEBUG, "out: " + str(self.retcode))
 
@@ -879,7 +887,7 @@ class RunWith(object):
                     # print output.strip()
             if not silent:
                 self.logger.log(lp.DEBUG, "\n\nLeaving runAs with Sudo: \"" +
-                                str(self.output) + "\"\n\n")
+                                str(self.stdout) + "\"\n\n")
         self.command = None
         return self.stdout, self.stderr, self.retcode
 
@@ -980,7 +988,7 @@ class RunWith(object):
                 # ONLY USE WHEN IN DEVELOPMENT AND DEBUGGING OR YOU MAY
                 # REVEAL MORE THAN YOU WANT TO IN THE LOGS!!!
                 self.logger.log(lp.DEBUG, "\n\nLeaving runAs with Sudo: \"" + \
-                                str(output) + "\"\n" + str(self.output) + "\n")
+                                str(output) + "\"\n" + str(self.stdout) + "\n")
             return output
 
 ##############################################################################

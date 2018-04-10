@@ -4,24 +4,24 @@ Helper functions using MacOS specific methods.
 @author: Roy Nielsen
 """
 from __future__ import absolute_import
-#--- Native python libraries
+# --- Native python libraries
 import os
 import re
 import sys
 import platform
 import traceback
 
-#--- non-native python libraries in this source tree
-from . loggers import CyLogger
-from . loggers import LogPriority as lp
-from . run_commands import RunWith
+# --- non-native python libraries in this source tree
+from .loggers import CyLogger
+from .loggers import LogPriority as lp
+from .run_commands import RunWith
 
 logger = CyLogger()
 run = RunWith(logger)
 
 ###########################################################################
 
-class FoundException(Exception) :
+class FoundException(Exception):
     """
     Exeption to raise when the condition is met in a for/while
 
@@ -36,21 +36,21 @@ class FoundException(Exception) :
 
 ###########################################################################
 
-def get_os_vers() :
+def get_os_vers():
     """
     Get the version of OS X
-    
+
     @author: Roy Nielsen
     """
-    os_vers = platform.mac_ver()[0] 
-    if os_vers :
+    os_vers = platform.mac_ver()[0]
+    if os_vers:
         return os_vers
-    else :
+    else:
         return -1
 
 ###########################################################################
 
-def get_os_minor_vers() :
+def get_os_minor_vers():
     """
     return the minor version of the OS.
     """
@@ -60,18 +60,18 @@ def get_os_minor_vers() :
         re_vers = re.search("^10.(\d+).*", os_vers)
         if re_vers:
             minor_vers = re_vers.group(1)
-        else :
+        else:
             logger.log(lp.INFO, "No valid minor version found...")
-    else :
+    else:
         logger.log(lp.INFO, "Didn't get a valid os version...")
 
     return minor_vers
 
 ###########################################################################
 
-def get_darwin_mac() :
+def get_darwin_mac(hardwarePort="", firstDevice=False):
     """
-    Get the mac address and place it in net_hw_addr 
+    Get the mac address and place it in net_hw_addr
 
     Future METHOD: Use the "ifconfig" command - look for the "active" interface
     - collect "interface", "mac", "ipaddr" to return.  PATH to ifconfig may be
@@ -81,28 +81,33 @@ def get_darwin_mac() :
                    processing the output to get the network interface mac
                    address.  Specific to the Mac.
 
+    @param: hardwarePort - string to look for in the Hardware Port line
+                           of the output of the command above.
+
     @author: Roy Nielsen
     """
-    found = 0
-
     cmd = ["/usr/sbin/networksetup", "-listallhardwareports"]
 
     run.setCommand(cmd)
     run.communicate()
-    retval, reterr, retcode = run.getNlogReturns()
+    retval, _, _ = run.getNlogReturns()
+    try:
+        found = 0
+        for line in retval.split("\n"):
+            match_hw_addr = re.compile\
+                         ("^Ethernet Address:\s+(\w+:\w+:\w+:\w+:\w+:\w+)\s*$")
 
-    try :
-        for line in retval.split("\n") :
-            match_hw_addr = re.compile \
-            ("^Ethernet Address:\s+(\w+:\w+:\w+:\w+:\w+:\w+)\s*$")
-
-            if re.match("^Device:\s+(\w+)\s*$", line) :
+            if re.match("^Device:\s+(\w+)\s*$", line) and firstDevice:
+                found = 1
+            if hardwarePort and \
+               re.match("^Hardware Port: ", line) and \
+               re.search("%s"%hardwarePort, line):
                 found = 1
             if re.match \
               ("^Ethernet Address:\s+(\w+:\w+:\w+:\w+:\w+:\w+)\s*$", \
-              line) and found == 1 :
+              line) and found == 1:
                 raise FoundException
-    except FoundException :
+    except FoundException:
         hw_addr = match_hw_addr.search(line)
         net_hw_addr = hw_addr.group(1)
         #  net_hw_addr
@@ -111,7 +116,7 @@ def get_darwin_mac() :
         logger.log(lp.WARNING, traceback.format_exc())
         logger.log(lp.WARNING, str(err))
         raise err
-    else :
+    else:
         net_hw_addr = "No MAC addr found"
         logger.log(lp.VERBOSE, "No MAC address found")
 
@@ -119,7 +124,7 @@ def get_darwin_mac() :
 
 ###########################################################################
 
-def getResourcesDir() :
+def getResourcesDir():
     """
     Get the full path to the Resources directory of the current app
 
@@ -139,12 +144,12 @@ def getResourcesDir() :
 
     # Join up the directory with slashes
     resource_dir = "/".join(parents)
-
+    logger.log(lp.DEBUG, "Resource Dir: " + str(resource_dir))
     return resource_dir
 
 ###########################################################################
 
-def getMacOSDir() :
+def getMacOSDir():
     """
     Get the full path to the Resources directory of the current app
 
@@ -169,14 +174,14 @@ def getMacOSDir() :
 
 ###########################################################################
 
-def get_script() :
+def get_script():
     """
     """
     return os.path.abspath(sys.argv[0])
 
 ###########################################################################
 
-def is_laptop() :
+def is_laptop():
     """
     Determine if the machine this is currently running on is a laptop
 
@@ -188,24 +193,26 @@ def is_laptop() :
 
     run.setCommand(cmd)
     run.communicate()
-    retval, reterr, retcode = run.getNlogReturns()
+    retval, reterr, _ = run.getNlogReturns()
 
     if not reterr:
         if retval:
-            for line in retval.split("\n") :
+            for line in retval.split("\n"):
                 if re.match("^\s+Model Name:", line):
                     if re.search("[bB]ook", line):
                         isThisALaptop = True
                         break
-        else :
-            logger.log(lp.VERBOSE, "Error processing system_profiler output...")
-    else :
-        logger.log(lp.VERBOSE, "Error processing system_profiler output: " + str(reterr))
+        else:
+            logger.log(lp.VERBOSE,
+                       "Error processing system_profiler output...")
+    else:
+        logger.log(lp.VERBOSE, "Error processing system_profiler output: " +
+                   str(reterr))
     return isThisALaptop
 
 ###########################################################################
 
-def checkIfUserIsLocalAdmin(username="", message_level="normal") :
+def checkIfUserIsLocalAdmin(username=""):
     """
     Check the local directory and see if a user is an admin on the system.
 
@@ -220,21 +227,25 @@ def checkIfUserIsLocalAdmin(username="", message_level="normal") :
 
     userFound = False
 
-    if not re.match("^\s*$", username) :
+    if not re.match("^\s*$", username):
 
-        cmd = ["/usr/bin/dscl", ".", "read", "/Groups/admin", "GroupMembership"]
+        cmd = ["/usr/bin/dscl",
+               ".",
+               "read",
+               "/Groups/admin",
+               "GroupMembership"]
 
         logger.log(lp.VERBOSE, "About to run command: " + " ".join(cmd))
 
         run.setCommand(cmd)
         run.communicate()
-        retval, reterr, retcode = run.getNlogReturns()
+        retval, _, _ = run.getNlogReturns()
 
         if retval:
             users = retval.split()[1:]
-            #print str(users)
-            for user in users :
-                if re.match("^%s$"%user, username) :
+            # print str(users)
+            for user in users:
+                if re.match("^%s$" % user, username):
                     userFound = True
                     break
 
