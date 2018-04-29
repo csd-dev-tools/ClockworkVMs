@@ -24,19 +24,19 @@ SUDO="/usr/bin/sudo"
 MAKE="/usr/bin/make"
 CS="/usr/bin/codesign"
 
-PYUIC="/usr/local/bin/pyuic5"
+PYUIC="/opt/tools/bin/pyuic5"
 
-PYINSTALLER_MAKESPEC="/usr/local/bin/pyi-makespec"
-PYINSTALLER_BUILD="/usr/local/bin/pyinstaller"
+PYINSTALLER_MAKESPEC="/opt/tools/bin/pyi-makespec"
+PYINSTALLER_BUILD="/opt/tools/bin/pyinstaller"
 
 ###################################################
 # Set these variables to make sure pyinstaller can
 # find the tool libraries to build PyQt5 applications
-export PYTHONPATH=/opt/tools/lib/Python/2.7/site-packages:/opt/tools/lib/Python/2.7/site-packages/PyQt5:/opt/tools/lib/Qt5.6.1/lib:/opt/tools/lib/Python/2.7/site-packages/sip:$PYTHONPATH
-export DYLD_LIBRARY_PATH=/opt/tools/lib/Qt5.6.1/lib:/opt/tools/lib/Python/2.7/site-packages:/opt/tools/lib/Python/2.7/site-packages/PyQt5:/opt/tools/lib/Python/2.7/site-packages/sip:$DYLD_LIBRARY_PATH
-export DYLD_FRAMEWORK_PATH=/opt/tools/lib/Qt5.6.1/lib:/opt/tools/lib/Python/2.7/site-packages:/opt/tools/lib/Python/2.7/site-packages/PyQt5:/opt/tools/lib/Python/2.7/site-packages/sip:$DYLD_FRAMEWORK_PATH
-export LD_FRAMEWORK_PATH=/opt/tools/lib/Qt5.6.1/lib:/opt/tools/lib/Python/2.7/site-packages:/opt/tools/lib/Python/2.7/site-packages/PyQt5:/opt/tools/lib/Python/2.7/site-packages/sip:$LD_FRAMEWORK_PATH
-export LD_LIBRARY_PATH=/opt/tools/lib/Qt5.6.1/lib:/opt/tools/lib/Python/2.7/site-packages:/opt/tools/lib/Python/2.7/site-packages/PyQt5:/opt/tools/lib/Python/2.7/site-packages/sip:$LD_LIBRARY_PATH
+export PYTHONPATH=/opt/tools/lib/Python/2.7/site-packages:/opt/tools/lib/Python/2.7/site-packages/PyQt5:/opt/tools/lib/Qt5.9.4/lib:/opt/tools/lib/Python/2.7/site-packages/sip:/opt/tools/lib/python2.7/site-packages:$PYTHONPATH
+export DYLD_LIBRARY_PATH=/opt/tools/lib/Qt5.9.4/lib:/opt/tools/lib/Python/2.7/site-packages:/opt/tools/lib/Python/2.7/site-packages/PyQt5:/opt/tools/lib/Python/2.7/site-packages/sip:$DYLD_LIBRARY_PATH
+export DYLD_FRAMEWORK_PATH=/opt/tools/lib/Qt5.9.4/lib:/opt/tools/lib/Python/2.7/site-packages:/opt/tools/lib/Python/2.7/site-packages/PyQt5:/opt/tools/lib/Python/2.7/site-packages/sip:$DYLD_FRAMEWORK_PATH
+export LD_FRAMEWORK_PATH=/opt/tools/lib/Qt5.9.4/lib:/opt/tools/lib/Python/2.7/site-packages:/opt/tools/lib/Python/2.7/site-packages/PyQt5:/opt/tools/lib/Python/2.7/site-packages/sip:$LD_FRAMEWORK_PATH
+export LD_LIBRARY_PATH=/opt/tools/lib/Qt5.9.4/lib:/opt/tools/lib/Python/2.7/site-packages:/opt/tools/lib/Python/2.7/site-packages/PyQt5:/opt/tools/lib/Python/2.7/site-packages/sip:$LD_LIBRARY_PATH
 
 #####
 # Change version string in Lanl_Fv2.py
