@@ -53,15 +53,14 @@ def processBuilders(section=''):
             print "\t" + str(key) + " : " + str(value) + "\n"
     printFooter()
      
+'''
 def processVariables(section=''):
-    '''
-    '''
     printHeader()
     print "//# variables                            #"
     for key, value in section.iteritems():
         print "\t" + str(key) + " : " + str(value)
     printFooter()
-     
+ '''    
 def processProvisioners(section=''):
     '''
     '''
@@ -84,10 +83,10 @@ if __name__ == "__main__":
 
         if re.match("builders", key):
             processBuilders(value)
-
+        '''
         if re.match("variables", key):
             processVariables(value)
-
+        '''
         if re.match("provisioners", key):
             processProvisioners(value)
 
