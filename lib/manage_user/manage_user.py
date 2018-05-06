@@ -86,6 +86,7 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -107,6 +108,7 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -126,6 +128,7 @@ class ManageUser(object):
         """
         Get information about the passed in user.
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -145,6 +148,7 @@ class ManageUser(object):
         """
         Get information about the passed in user.
         """
+        success = False
         properties = {}
         #####
         # Preprocess logging
@@ -164,6 +168,7 @@ class ManageUser(object):
         """
         Retrieve the passed in user's shell.
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -183,6 +188,7 @@ class ManageUser(object):
         """
         Retrieve the passed in user's "user comment", or real name.
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -202,6 +208,7 @@ class ManageUser(object):
         """
         Retrieve the passed in user's UID.
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -221,6 +228,7 @@ class ManageUser(object):
         """
         Retrieve the passed in user's primary GID
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -240,6 +248,7 @@ class ManageUser(object):
         """
         Retrieve the passed in user's home directory
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -261,6 +270,7 @@ class ManageUser(object):
 
         @author Roy Nielsen
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -282,6 +292,7 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -304,6 +315,7 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -327,6 +339,7 @@ class ManageUser(object):
 
         @author:
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -351,6 +364,7 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -380,6 +394,7 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -393,6 +408,7 @@ class ManageUser(object):
                         str(success))
         return success
 
+    
     def createBasicUser(self, userName=""):
         """
         Create a username with just a moniker.  Allow the system to take care
@@ -403,6 +419,7 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -439,6 +456,7 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -462,6 +480,7 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -483,6 +502,7 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -504,6 +524,7 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -527,6 +548,7 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -551,6 +573,7 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -572,6 +595,7 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -593,6 +617,7 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -614,6 +639,7 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -637,6 +663,7 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -658,6 +685,7 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -681,6 +709,7 @@ class ManageUser(object):
 
         @author: Roy Nielsen
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")
@@ -699,6 +728,7 @@ class ManageUser(object):
     def authenticate(self, user="", password=""):
         """
         """
+        success = False
         #####
         # Preprocess logging
         self.logger.log(lp.DEBUG, "processing:" + "")

@@ -594,6 +594,8 @@ class MacOSUser(ManageUserTemplate):
         @author: Roy Nielsen
         """
         authenticated = False
+        output = ""
+        error = ""
 
         if not self.isSaneUserName(user) or \
            re.match("^\s+$", password) or not password:

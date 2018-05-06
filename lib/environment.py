@@ -279,8 +279,8 @@ class Environment(object):
         # Alternative (better) implementation for Linux
         if os.path.exists('/usr/bin/lsb_release'):
             proc = subprocess.Popen('/usr/bin/lsb_release -dr',
-                                  shell=True, stdout=subprocess.PIPE,
-                                  close_fds=True)
+                                    shell=True, stdout=subprocess.PIPE,
+                                    close_fds=True)
             description = proc.stdout.readline()
             release = proc.stdout.readline()
             description = description.split()
@@ -763,10 +763,10 @@ class Environment(object):
                                     stdout=subprocess.PIPE, close_fds=True)
             netdata = proc.stdout.readlines()
             for line in netdata:
-                print "processing: " + line
+                # print "processing: " + line
                 match = re.search(littlesnitch, line)
                 if match is not None:
-                    print 'LittleSnitch Is Running'
+                    # print 'LittleSnitch Is Running'
                     issnitchactive = True
                     break
         return issnitchactive
@@ -796,16 +796,18 @@ class Environment(object):
         #####
         # Check which argv variable has the script name -- required to allow
         # for using the eclipse debugger.
-        if re.search("stonix.py$", script_path_zero) or re.search("stonix$", script_path_zero):
+        if re.search("stonix.py$", script_path_zero) or \
+           re.search("stonix$", script_path_zero):
             #####
             # Run normally
             self.script_path = os.path.dirname(os.path.realpath(sys.argv[0]))
         else:
             #####
-            # Run with Eclipse debugger -- Eclipse debugger will never try to run
-            # the "stonix" binary blob created by pyinstaller, so don't include
-            # here.
-            #print "DEBUG: Environment.collectpaths: unexpected argv[0]: " + str(sys.argv[0])
+            # Run with Eclipse debugger -- Eclipse debugger will never try
+            # to run the "stonix" binary blob created by pyinstaller,
+            # so don't include here.
+            # print "DEBUG: Environment.collectpaths: unexpected argv[0]" + \
+            #       ": " + str(sys.argv[0])
             if re.search("stonix.py$", script_path_one) or \
                re.search("stonixtest.py$", script_path_one):
                 script = script_path_one.split("/")[-1]
@@ -971,7 +973,7 @@ class Environment(object):
         @param num: int - number of rules that apply to this host
         @author: dkennel
         '''
-        if isinstance(int, num):
+        if not isinstance(num, int):
             raise TypeError('Number of rules must be an integer')
         elif num < 0:
             raise ValueError('Number of rules must be a positive integer')

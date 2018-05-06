@@ -95,7 +95,7 @@ class CyLogger(object):
     def __init__(self, environ=False, debug_mode=False, verbose_mode=False, level=30):
         """
         """
-        #print ".............Level: " + str(level)
+        # print ".............Level: " + str(level)
         self.lvl = int(level)
         '''
         if environ:
@@ -109,7 +109,7 @@ class CyLogger(object):
                 self.lvl = 10
             elif re.match("^verbose$", envVerboseMode):
                 self.lvl = 20
-        el'''
+        '''
         if debug_mode or verbose_mode:
             if debug_mode:
                 self.lvl = 10
