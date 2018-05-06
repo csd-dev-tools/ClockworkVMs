@@ -72,7 +72,7 @@ class VirtualMachineBuilder(QtWidgets.QMainWindow):
         #self.logger = self.conf.get_logger()
         self.logger.log(lp.DEBUG, str(self.logger))
         self.runWith = RunWith(self.logger)
-        self.libc = getLibc(self.logger)
+        self.libc = getLibc()
 
         #####
         # Set label states

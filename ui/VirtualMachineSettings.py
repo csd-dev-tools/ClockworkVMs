@@ -73,7 +73,7 @@ class VirtualMachineSettings(QtWidgets.QDialog):
         #self.logger = self.conf.get_logger()
         self.logger.log(lp.DEBUG, str(self.logger))
         self.runWith = RunWith(self.logger)
-        self.libc = getLibc(self.logger)
+        self.libc = getLibc()
         self.vPjh = PackerJsonHandler(self.logger) # variables file
         self.tPjh = PackerJsonHandler(self.logger) # template file
         self.jsonData = {}

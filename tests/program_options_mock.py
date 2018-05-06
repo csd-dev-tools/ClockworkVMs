@@ -9,7 +9,7 @@ from collections import OrderedDict
 
 mydir = os.path.dirname(os.path.abspath(__file__))
 parentdir = "/" + "/".join(mydir.split("/")[:-1])
-print parentdir
+# print parentdir
 sys.path.append(parentdir)
 
 from lib.loggers import CyLogger
@@ -32,10 +32,10 @@ progOpts = ProgramOptions()
 
 programOptions = acquireProgOptDict(str(progOpts.options))
 
-#print str(programOptions)
+print json.dumps(programOptions)
 
 options = sorted(programOptions.items(),
                  key=itemgetter(1), 
                  reverse=True)
 
-print str(options)
+# print str(options)

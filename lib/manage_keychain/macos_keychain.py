@@ -460,9 +460,9 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
 
     def changeKeychainPassword(self,
                                user="",
-                               oldPass=False,
-                               newPass=False,
-                               keychain=False):
+                               oldPass="",
+                               newPass="",
+                               keychain=""):
         """
         Use the "security" command to set the login keychain.  If it has not
         been created, create the login keychain.
@@ -769,7 +769,6 @@ class MacOSKeychain(MacOSUser, ManageKeychainTemplate):
         '''
         success = False
         stdout = False
-        name = name.strip()
         keychain = keychain.strip()
         if not options:
             options = []

@@ -19,7 +19,7 @@ def setUserCreds(username='', password=''):
 #####
 # Get admin user credentials
 adminCreds = AdministratorCredentials(logger)
-adminCreds.userCreds.connect(self.setUserCreds)
+adminCreds.userCreds.connect(setUserCreds)
 adminCreds.ui.adminName.setText('Not Today Wabbit!')
 adminCreds.ui.passwordLineEdit.setFocus()
 adminCreds.show()

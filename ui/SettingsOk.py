@@ -69,7 +69,7 @@ class SettingsOk(QtWidgets.QDialog):
         #self.logger = self.conf.get_logger()
         self.logger.log(lp.DEBUG, str(self.logger))
         self.runWith = RunWith(self.logger)
-        self.libc = getLibc(self.logger)
+        self.libc = getLibc()
 
         #####
         # Handle button box

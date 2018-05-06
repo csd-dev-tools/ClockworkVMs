@@ -331,7 +331,7 @@ class CyLogger(object):
 
     #############################################
 
-    def log(self, priority=0, msg=""):
+    def log(self, priority, msg):
         """
         Interface to work similar to Stonix's LogDispatcher.py
 
@@ -401,17 +401,21 @@ class CyLogger(object):
                                                  str(function_name), 
                                                  str(line_number))
         msg_list = []
-        if isinstance(msg, list):
-            msg_list = msg
-        elif isinstance(msg, basestring):
+        if not msg:
+            return
+        if isinstance(msg, basestring) and "\n" not in msg:
+            msg_list = [msg]
+        elif isinstance(msg, basestring) and "\n" in msg:
             first_msg_list = msg.split("\n")
             for mymsg in first_msg_list:
                 msg_list.append(mymsg + "\n")
+        elif msg and isinstance(msg, list):
+            msg_list = msg
         elif isinstance(msg, dict):
             for key, value in msg.iteritems():
                 msg_list.append(str(key) + " : " + str(value))
         else:
-            msg_list = msg
+            msg_list = [str(msg)]
 
         for line in msg_list:
             #####

@@ -75,7 +75,7 @@ class ConfigureRepos(QtWidgets.QDialog):
         #self.logger = self.conf.get_logger()
         self.logger.log(lp.DEBUG, str(self.logger))
         self.runWith = RunWith(self.logger)
-        self.libc = getLibc(self.logger)
+        self.libc = getLibc()
         self.chkApp = CheckApplicable(self.environ, self.logger)
         macOsWhiteListApplicable = {'type': 'white', 'os': {'Mac OS X': ['10.0.0', 'r', '20.12.10']}}
 

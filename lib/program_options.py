@@ -49,17 +49,6 @@ class ProgramOptions(object) :
         self.environ = Environment()
 
         #####
-        # Define the default log directory, and make sure it
-        # it exists as a directory.
-        self.resources = getResourcesDir()
-        defaultLogDir = os.path.join(self.resources, "logs")
-        """
-        if not os.path.isdir(defaultLogDir):
-            if os.path.exists(defaultLogDir):
-                os.unlink(defaultLogDir)
-            os.mkdir(defaultLogDir)
-        """
-        #####
         # Collect the passed in parameters, or define them as default.
 
         parser = OptionParser(usage="  %prog [options]\n\n"  + \
