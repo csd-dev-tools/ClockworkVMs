@@ -56,12 +56,12 @@ import time
 
 try:
     from localize import VERSION
-except:
+except ImportError or AssertionError:
     VERSION = '0.0.1'
 
 try:
     from localize import FISMACAT
-except:
+except ImportError or AssertionError:
     FISMACAT = 'low'
 
 if os.geteuid() == 0:
