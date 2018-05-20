@@ -53,3 +53,14 @@ def NotACyLoggerError(BaseException):
     def __init__(self, *args, **kwargs):
         Exception.__init__(self, *args, **kwargs)
 
+class FoundException(Exception) :
+    """
+    Exeption to raise when the condition is met in a for/while
+
+    For more examples on python user defined exceptions:
+    http://docs.python.org/2/tutorial/errors.html
+    """
+    def __init__(self, *args, **kwargs):
+        Exception.__init__(self, *args, **kwargs)
+
+

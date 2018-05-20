@@ -29,17 +29,27 @@ class test_libHelperFunctions(unittest.TestCase):
         """
         pass
 
-    def test_FoundException(self):
+    def test_getConsoleUser(self):
         """ 
         """
         pass
 
-    def test_get_os_vers(self):
+    def test_touch(self):
         """ 
         """
         pass
 
-    def test_get_os_minor_vers(self):
+    def test_getecho(self):
+        """ 
+        """
+        pass
+
+    def test_waitnoecho(self):
+        """ 
+        """
+        pass
+
+    def test_isSaneFilePath(self):
         """ 
         """
         pass
