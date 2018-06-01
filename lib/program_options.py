@@ -30,7 +30,7 @@ from optparse import OptionParser, SUPPRESS_HELP
 from . conf import Conf
 from . loggers import CyLogger
 from . loggers import LogPriority as lp
-from . libHelperFunctions import get_console_user
+from . libHelperFunctions import getConsoleUser
 from . libMacOSHelperFunctions import getResourcesDir
 from . environment import Environment
 
