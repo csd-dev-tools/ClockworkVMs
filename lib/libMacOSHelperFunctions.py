@@ -10,6 +10,7 @@ import re
 import sys
 import platform
 import traceback
+from subprocess import Popen, PIPE, STDOUT
 
 # --- non-native python libraries in this source tree
 from .loggers import CyLogger
