@@ -10,6 +10,7 @@ import re
 import sys
 import platform
 import traceback
+from subprocess import Popen, PIPE, STDOUT
 
 # --- non-native python libraries in this source tree
 from .loggers import CyLogger
@@ -295,4 +296,75 @@ def findLaunchJob(name=""):
             if success:
                 print str(lastStatus) + " = " + str(jobName)
     return success, jobName, lastStatus
+
+###########################################################################
+
+def installFdeUser(myusername="", mypassword="") :
+    """
+    Create an input plist for the fdesetup command to enable a user in the 
+    filevault login screen
+
+    @author: Roy Nielsen
+    """
+    success = False
+    logger.log(lp.DEBUG, "Starting installFdeUser...")
+    
+    if re.match("^\s*$", myusername) :
+        logger.log(lp.INFO, "Empty username: '" + str(myusername) + "'")
+
+    elif re.match("^\s*$", mypassword) :
+        logger.log(lp.INFO, "Empty password: '" + str(mypassword) + "'")
+        
+    if re.match("^\s*$", myusername) or re.match("^\s*$", mypassword) :
+        logger.log(lp.INFO, "in buildInputPlist -- cannot build the plist with an empty username or password...")
+        return success
+
+    plist = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + \
+            "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n" + \
+            "<plist version=\"1.0\">\n" + \
+            "\t<dict>\n" + \
+            "\t\t<key>Username</key>\n" + \
+            "\t\t<string>" + str(myusername) + "</string>\n" + \
+            "\t\t<key>Password</key>\n" + \
+            "\t\t<string>" + str(mypassword) + "</string>\n" + \
+            "\t</dict>\n</plist>"
+
+    #####
+    # Do the fdesetup command
+    cmd = ["/usr/bin/fdesetup", "enable", "-outputplist", "-inputplist"]
+    logger.log(lp.DEBUG, "Command: " + str(cmd))
+
+    proc = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    
+    (retval, reterr) = proc.communicate(plist + "\n")
+    
+    logger.log(lp.DEBUG, "retval: " + str(retval))
+    logger.log(lp.DEBUG, "reterr: " + str(reterr))
+
+    if not reterr:
+        success = True
+    
+    logger.log(lp.DEBUG, "Installed an Fde User...")
+    return success
+
+###########################################################################
+
+def removeFdeUser(myusername=""):
+    """
+    Remove a user from the FDE login screen
+    
+    @author: Roy Nielsen
+    """
+    success = False
+    if re.match("^\s+$", myusername) or not myusername:
+        logger.log(lp.INFO, "Empty username: '" + str(myusername) + "'")
+        return success
+    cmd = ["/usr/bin/fdesetup", "remove", myusername]
+    run.setCommand(cmd)
+    run.communicate()
+    if not run.getStderr():
+        success = True
+    return success
+
+
 
