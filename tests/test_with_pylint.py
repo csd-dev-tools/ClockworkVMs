@@ -54,6 +54,10 @@ def genTestData(fileList=[], excludeFiles=[], excludeFromLines=[]):
 
     pIface = PylintIface(logger)
     for myfile in fileList:
+        if not os.geteuid() == 0:
+            if re.search("environment.py", myfile):
+                excludeFiles.append(myfile)
+                print ("........... Testing environment.py requires uid 0 ..............")
         #print myfile
         #####
         # Don't process files that are in the exclude list
