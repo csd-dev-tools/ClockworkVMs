@@ -279,8 +279,7 @@ class ManageKeychain(object):
         self.__calledBy()
         #####
         # Call factory created object's mirror method
-        success = self.keychainMgr.changeKeychainPassword(*args,
-                                                                  **kwargs)
+        success = self.keychainMgr.changeKeychainPassword(*args, **kwargs)
         #####
         # Postprocess logging
         self.logger.log(lp.DEBUG, "processing complete with success: " +
@@ -306,7 +305,7 @@ class ManageKeychain(object):
         # Postprocess logging
         self.logger.log(lp.DEBUG, "processing complete with success: " +
                         str(success))
-        return success, output
+        return success
 
     # ----------------------------------------------------------------------
 
@@ -327,7 +326,7 @@ class ManageKeychain(object):
         # Postprocess logging
         self.logger.log(lp.DEBUG, "processing complete with success: " +
                         str(success))
-        return success, output
+        return success
 
     # ----------------------------------------------------------------------
 
